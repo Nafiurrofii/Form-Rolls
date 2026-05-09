@@ -5,6 +5,7 @@
 import { showNotification, confirmAction } from '../utils.js';
 import { getFormData, resetForm, validateForm, enableEditMode, disableEditMode } from '../modules/form.js';
 import { saveRoll } from '../modules/api.js';
+import { isEditMode, getSelectedRow } from '../state.js';
 // NOTE: Do NOT import storage functions - we save to DATABASE via API, not localStorage!
 
 /**
@@ -81,14 +82,25 @@ async function handleSimpan() {
   console.log('📋 Data Form yang akan dikirim ke DATABASE:', formData);
   
   try {
+    const editing = isEditMode();
+    const selected = getSelectedRow();
+    const rollId = (editing && selected) ? selected.id : null;
+
+    if (editing && !rollId) {
+       showNotification('❌ ID Data tidak ditemukan untuk diupdate.', 'error');
+       return;
+    }
+
     showNotification('Sedang menyimpan ke database...', 'info');
     console.log('⏳ Memanggil saveRoll() untuk simpan ke API/DATABASE');
-    const result = await saveRoll(formData);
+    const result = await saveRoll(formData, rollId);
     
     console.log('📤 Response dari API:', result);
     if (result.status === 'success') {
       console.log('✅ BERHASIL MENYIMPAN KE DATABASE! ID:', result.data?.id);
-      showNotification('✅ Data berhasil disimpan ke DATABASE!', 'success');
+      const successMsg = '✅ Data berhasil ' + (editing ? 'diperbarui' : 'disimpan') + ' ke DATABASE!';
+      showNotification(successMsg, 'success');
+      alert(successMsg);
       
       // Refresh tabel data agar yang baru tersimpan muncul
       if (window.formRollApp && typeof window.formRollApp.refreshTableData === 'function') {
@@ -96,8 +108,12 @@ async function handleSimpan() {
         await window.formRollApp.refreshTableData();
       }
       
-      // Optional: Reset form setelah simpan
-      // resetForm(); 
+      if (editing) {
+        disableEditMode();
+      }
+      
+      // Reset form setelah simpan
+      resetForm(); 
     } else {
       throw new Error('API returned non-success status: ' + result.status);
     }

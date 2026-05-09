@@ -48,7 +48,7 @@ export async function fetchRollById(id) {
 /**
  * Insert/Update roll
  */
-export async function saveRoll(data) {
+export async function saveRoll(data, id = null) {
   // Mapping field form ke field database dengan konversi tipe data yang sesuai
   const payload = {
     tanggal: data.tanggal || new Date().toISOString().split('T')[0],
@@ -67,15 +67,19 @@ export async function saveRoll(data) {
     pic: data.pic || ''
   };
 
-  console.log('📤 Sending to:', API_BASE_URL);
+  const action = id ? `update&id=${id}` : 'store';
+  const endpoint = `${API_BASE_URL}?action=${action}`;
+
+  console.log('📤 Sending to:', endpoint);
   console.log('📤 Payload:', payload);
 
   try {
-    const response = await fetch(`${API_BASE_URL}?action=store`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
+
     
     if (!response.ok) {
       const errorText = await response.text();

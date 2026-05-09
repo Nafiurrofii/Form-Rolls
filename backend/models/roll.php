@@ -138,17 +138,4 @@ class Roll {
         return true;
     }
 
-    /**
-     * DELETE DATA
-     */
-    public function delete($id) {
-
-        $sql = "DELETE FROM rolls WHERE id = :id";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([
-            ':id' => $id
-        ]);
-    }
 }

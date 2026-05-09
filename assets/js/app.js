@@ -10,6 +10,7 @@ import { attachButtonHandlers } from './components/button.js';
 import { getPreferences, savePreferences } from './modules/storage.js';
 import { showNotification } from './utils.js';
 import { fetchRolls } from './modules/api.js';
+import { resetForm } from './modules/form.js';
 
 /**
  * Initialize aplikasi
@@ -24,6 +25,10 @@ async function initializeApp() {
   await refreshTableData();
 
   attachButtonHandlers();
+  
+  // Kosongkan form pada saat awal aplikasi dimuat
+  resetForm();
+  
   console.log('✅ App initialized successfully');
 }
 

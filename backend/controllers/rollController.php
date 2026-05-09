@@ -65,31 +65,33 @@ function createRoll($pdo) {
  * UPDATE
  */
 function updateRoll($pdo, $id) {
+    try {
+        $input = json_decode(file_get_contents("php://input"), true);
+        error_log("UPDATE ROLL INPUT (ID: $id): " . json_encode($input));
 
-    $input = json_decode(file_get_contents("php://input"), true);
+        if (!$id) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'ID is required for update'
+            ]);
+            return;
+        }
 
-    $roll = new Roll($pdo);
+        $roll = new Roll($pdo);
+        $roll->update($id, $input);
 
-    $roll->update($id, $input);
-
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Data berhasil diupdate'
-    ]);
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Data berhasil diupdate'
+        ]);
+    } catch (Throwable $e) {
+        error_log("UPDATE ROLL ERROR: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'System error: ' . $e->getMessage()
+        ]);
+    }
 }
 
-/**
- * DELETE
- */
-function deleteRoll($pdo, $id) {
-
-    $roll = new Roll($pdo);
-
-    $roll->delete($id);
-
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Data berhasil dihapus'
-    ]);
-}
 
