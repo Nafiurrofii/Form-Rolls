@@ -1,0 +1,230 @@
+/* ─────────────────────────────────────────────────────
+   COMPONENTS - Button, Input, Select, Form Elements
+   ──────────────────────────────────────────────────── */
+
+/* ─── INPUT FIELDS ────────────────────────────────── */
+input[type="text"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+select {
+  width: 100%;
+  height: 36px;
+  border: 1.5px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: var(--font-main);
+  color: var(--gray-dark);
+  background: var(--white);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--blue-mid);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+/* ─── FIELD ROW ───────────────────────────────────── */
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.field-row label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-dark);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.field-row .input-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.edit-wrap {
+  display: flex;
+  gap: 6px;
+}
+
+.edit-wrap input {
+  flex: 1;
+}
+
+/* ─── SMALL BUTTON ───────────────────────────────── */
+.btn-sm {
+  height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid var(--blue-mid);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--blue-mid);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+
+.btn-sm:hover {
+  background: var(--blue-mid);
+  color: #fff;
+}
+
+/* ─── PRIMARY BUTTONS ─────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 22px;
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity .15s, transform .1s;
+  letter-spacing: .3px;
+}
+
+.btn:active {
+  transform: scale(.97);
+}
+
+.btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.btn-primary  { background: var(--blue-mid);   color: #fff; }
+.btn-success  { background: var(--green-main); color: #fff; }
+.btn-warning  { background: var(--white); color: var(--yellow-main); border: 1.5px solid var(--yellow-main); }
+.btn-danger   { background: var(--white); color: var(--red-main);    border: 1.5px solid var(--red-main); }
+.btn-neutral  { background: var(--white); color: var(--gray-mid);    border: 1.5px solid var(--gray-border); }
+
+.btn:hover {
+  opacity: .88;
+}
+
+/* ─── TOOL BUTTONS ───────────────────────────────── */
+.btn-tool {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid;
+  background: var(--white);
+  transition: background .15s, color .15s;
+}
+
+.btn-tool.lihat {
+  color: var(--blue-mid);
+  border-color: var(--blue-mid);
+}
+
+.btn-tool.excel {
+  color: var(--green-main);
+  border-color: var(--green-main);
+}
+
+.btn-tool.lihat:hover {
+  background: var(--blue-mid);
+  color: #fff;
+}
+
+.btn-tool.excel:hover {
+  background: var(--green-main);
+  color: #fff;
+}
+
+/* ─── FILTER BUTTON ───────────────────────────────– */
+.btn-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1.5px solid var(--blue-mid);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--blue-mid);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.btn-filter:hover {
+  background: var(--blue-mid);
+  color: #fff;
+}
+
+/* ─── BADGE ───────────────────────────────────────– */
+.badge-shift {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--blue-light);
+  color: var(--blue-main);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* ─── PAGINATION ───────────────────────────────── */
+.page-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1.5px solid var(--gray-border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--gray-dark);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, border-color .15s, color .15s;
+}
+
+.page-btn:hover {
+  border-color: var(--blue-mid);
+  color: var(--blue-mid);
+}
+
+.page-btn.active {
+  background: var(--blue-mid);
+  border-color: var(--blue-mid);
+  color: #fff;
+}
+
+.page-btn:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+.page-dots {
+  color: var(--gray-mid);
+  font-size: 13px;
+  padding: 0 4px;
+}

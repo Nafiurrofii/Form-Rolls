@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Roll - API Tester</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 10px;
+    }
+    
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 15px;
+    }
+    
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    input, select, textarea {
+      padding: 10px;
+      border: 1.5px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    
+    .btn-primary:hover { opacity: 0.9; }
+    
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+    
+    .btn-success {
+      background: #16a34a;
+      color: white;
+    }
+    
+    .btn-warning {
+      background: #d97706;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f9fafb;
+      border-left: 4px solid #2563eb;
+      border-radius: 5px;
+    }
+    
+    .section h2 {
+      color: #2563eb;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    
+    .response-box {
+      background: #1f2937;
+      color: #10b981;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      max-height: 500px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+    
+    .response-box.error {
+      color: #f87171;
+    }
+    
+    .response-box.success {
+      color: #10b981;
+    }
+    
+    .loading {
+      display: none;
+      color: #6b7280;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+    
+    .loading.active {
+      display: block;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    
+    .status-badge.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-badge.error {
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .tab-btn {
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #6b7280;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tab-btn.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🚀 Form Roll - API Tester</h1>
+  
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('read')">📖 READ</button>
+    <button class="tab-btn" onclick="switchTab('create')">➕ CREATE</button>
+    <button class="tab-btn" onclick="switchTab('update')">✏️ UPDATE</button>
+    <button class="tab-btn" onclick="switchTab('delete')">🗑️ DELETE</button>
+  </div>
+  
+  <!-- ═════ READ TAB ═════ -->
+  <div id="read" class="tab-content active">
+    <div class="section">
+      <h2>Get All Rolls</h2>
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label>Page</label>
+            <input type="number" id="page" value="1" min="1">
+          </div>
+          <div class="form-group">
+            <label>Limit (Records per page)</label>
+            <input type="number" id="limit" value="10" min="1" max="100">
+          </div>
+          <div class="form-group">
+            <label>Search (optional)</label>
+            <input type="text" id="search" placeholder="Search by nama, mesin, trace...">
+          </div>
+          <div class="button-group">
+            <button class="btn-primary" onclick="getAll()">Get All Rolls</button>
+            <button class="btn-secondary" onclick="clearResponse()">Clear</button>
+          </div>
+        </div>
+        <div>
+          <label>Response:</label>
+          <div id="responseRead" class="response-box"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Get Single Roll</h2>
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label>Roll ID</label>
+            <input type="number" id="rollId" value="1" min="1">
+          </div>
+          <div class="button-group">
+            <button class="btn-primary" onclick="getOne()">Get Roll</button>
+            <button class="btn-secondary" onclick="clearResponse()">Clear</button>
+          </div>
+        </div>
+        <div>
+          <label>Response:</label>
+          <div id="responseRead2" class="response-box"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Get Statistics</h2>
+      <div class="grid-2">
+        <div>
+          <div class="button-group">
+            <button class="btn-success" onclick="getStatistics()">Get Statistics</button>
+            <button class="btn-secondary" onclick="clearResponse()">Clear</button>
+          </div>
+        </div>
+        <div>
+          <label>Response:</label>
+          <div id="responseStats" class="response-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ═════ CREATE TAB ═════ -->
+  <div id="create" class="tab-content">
+    <div class="section">
+      <h2>Create New Roll</h2>
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label>Tanggal *</label>
+            <input type="date" id="tanggal" value="2026-05-06">
+          </div>
+          <div class="form-group">
+            <label>Jam</label>
+            <input type="time" id="jam" value="06:00:00">
+          </div>
+          <div class="form-group">
+            <label>Roll</label>
+            <input type="number" id="roll" value="1">
+          </div>
+          <div class="form-group">
+            <label>Group</label>
+            <select id="groupCreate">
+              <option value="">Select Group</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mesin</label>
+            <input type="text" id="mesinCreate" placeholder="e.g., 16">
+          </div>
+          <div class="form-group">
+            <label>Nama *</label>
+            <input type="text" id="namaCreate" placeholder="e.g., PP PUTIH JUMBO">
+          </div>
+          <div class="form-group">
+            <label>Denier *</label>
+            <input type="number" id="denierCreate" value="1600">
+          </div>
+          <div class="form-group">
+            <label>Panjang</label>
+            <input type="number" id="panjangCreate" value="500">
+          </div>
+          <div class="form-group">
+            <label>Lebar</label>
+            <input type="number" id="lebarCreate" value="180">
+          </div>
+          <div class="form-group">
+            <label>Anyam</label>
+            <input type="text" id="anyamCreate" placeholder="e.g., 197">
+          </div>
+          <div class="form-group">
+            <label>Berat</label>
+            <input type="number" id="beratCreate" value="78.6" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Trace Code</label>
+            <input type="text" id="traceCreate" placeholder="e.g., 06-0609-C-16-4">
+          </div>
+          <div class="form-group">
+            <label>Keterangan</label>
+            <textarea id="keteranganCreate" rows="2" placeholder="Notes..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>PIC</label>
+            <input type="text" id="picCreate" placeholder="e.g., 197">
+          </div>
+          <div class="button-group">
+            <button class="btn-primary" onclick="createRoll()">Create Roll</button>
+            <button class="btn-secondary" onclick="resetCreateForm()">Reset</button>
+          </div>
+        </div>
+        <div>
+          <label>Response:</label>
+          <div id="responseCreate" class="response-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ═════ UPDATE TAB ═════ -->
+  <div id="update" class="tab-content">
+    <div class="section">
+      <h2>Update Roll</h2>
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label>Roll ID *</label>
+            <input type="number" id="updateId" value="1" min="1">
+          </div>
+          <div class="form-group">
+            <label>Nama</label>
+            <input type="text" id="namaUpdate" placeholder="Leave empty to skip">
+          </div>
+          <div class="form-group">
+            <label>Berat</label>
+            <input type="number" id="beratUpdate" step="0.1" placeholder="Leave empty to skip">
+          </div>
+          <div class="form-group">
+            <label>Mesin</label>
+            <input type="text" id="mesinUpdate" placeholder="Leave empty to skip">
+          </div>
+          <div class="form-group">
+            <label>Keterangan</label>
+            <textarea id="keteranganUpdate" rows="2" placeholder="Leave empty to skip"></textarea>
+          </div>
+          <div class="button-group">
+            <button class="btn-primary" onclick="updateRoll()">Update Roll</button>
+            <button class="btn-secondary" onclick="resetUpdateForm()">Reset</button>
+          </div>
+        </div>
+        <div>
+          <label>Response:</label>
+          <div id="responseUpdate" class="response-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ═════ DELETE TAB ═════ -->
+  <div id="delete" class="tab-content">
+    <div class="section">
+      <h2>Delete Single Roll</h2>
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label>Roll ID *</label>
+            <input type="number" id="deleteId" value="1" min="1">
+          </div>
+          <div class="button-group">
+            <button class="btn-danger" onclick="deleteRoll()">Delete Roll</button>
+            <button class="btn-secondary" onclick="clearResponse()">Clear</button>
+          </div>
+        </div>
+        <div>
+          <label>Response:</label>
+          <div id="responseDelete" class="response-box"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Delete Multiple Rolls</h2>
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label>IDs (comma-separated)</label>
+            <input type="text" id="deleteIds" placeholder="e.g., 1,2,3,4,5">
+          </div>
+          <div class="button-group">
+            <button class="btn-danger" onclick="deleteMultiple()">Delete Multiple</button>
+            <button class="btn-secondary" onclick="clearResponse()">Clear</button>
+          </div>
+        </div>
+        <div>
+          <label>Response:</label>
+          <div id="responseDeleteMultiple" class="response-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+const BASE_URL = '../roll.php'; // Adjust path if needed
+
+// ─── TAB SWITCHING ───────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  
+  document.getElementById(tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── RESPONSE DISPLAY ─────────────────────────
+function displayResponse(elementId, data, isError = false) {
+  const el = document.getElementById(elementId);
+  el.textContent = JSON.stringify(data, null, 2);
+  el.className = `response-box ${isError ? 'error' : 'success'}`;
+}
+
+function clearResponse() {
+  document.querySelectorAll('.response-box').forEach(el => {
+    el.textContent = 'Response will appear here...';
+    el.className = 'response-box';
+  });
+}
+
+// ─── READ OPERATIONS ─────────────────────────
+async function getAll() {
+  const page = document.getElementById('page').value;
+  const limit = document.getElementById('limit').value;
+  const search = document.getElementById('search').value;
+  
+  let url = `${BASE_URL}?action=get&page=${page}&limit=${limit}`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
+  
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    displayResponse('responseRead', data);
+  } catch (error) {
+    displayResponse('responseRead', { error: error.message }, true);
+  }
+}
+
+async function getOne() {
+  const id = document.getElementById('rollId').value;
+  
+  if (!id) {
+    alert('Please enter Roll ID');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${BASE_URL}?action=get_one&id=${id}`);
+    const data = await response.json();
+    displayResponse('responseRead2', data);
+  } catch (error) {
+    displayResponse('responseRead2', { error: error.message }, true);
+  }
+}
+
+async function getStatistics() {
+  try {
+    const response = await fetch(`${BASE_URL}?action=statistics`);
+    const data = await response.json();
+    displayResponse('responseStats', data);
+  } catch (error) {
+    displayResponse('responseStats', { error: error.message }, true);
+  }
+}
+
+// ─── CREATE OPERATION ──────────────────────
+async function createRoll() {
+  const payload = {
+    tanggal: document.getElementById('tanggal').value,
+    jam: document.getElementById('jam').value,
+    roll: document.getElementById('roll').value,
+    group_name: document.getElementById('groupCreate').value,
+    mesin: document.getElementById('mesinCreate').value,
+    nama: document.getElementById('namaCreate').value,
+    denier: document.getElementById('denierCreate').value,
+    panjang: document.getElementById('panjangCreate').value,
+    lebar: document.getElementById('lebarCreate').value,
+    anyam: document.getElementById('anyamCreate').value,
+    berat: document.getElementById('beratCreate').value,
+    trace_code: document.getElementById('traceCreate').value,
+    keterangan: document.getElementById('keteranganCreate').value,
+    pic: document.getElementById('picCreate').value
+  };
+  
+  try {
+    const response = await fetch(`${BASE_URL}?action=store`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    displayResponse('responseCreate', data);
+  } catch (error) {
+    displayResponse('responseCreate', { error: error.message }, true);
+  }
+}
+
+function resetCreateForm() {
+  document.getElementById('tanggal').value = '2026-05-06';
+  document.getElementById('jam').value = '06:00:00';
+  document.getElementById('roll').value = '1';
+  document.getElementById('groupCreate').value = '';
+  document.getElementById('mesinCreate').value = '';
+  document.getElementById('namaCreate').value = '';
+  document.getElementById('denierCreate').value = '1600';
+  document.getElementById('panjangCreate').value = '500';
+  document.getElementById('lebarCreate').value = '180';
+  document.getElementById('anyamCreate').value = '';
+  document.getElementById('beratCreate').value = '78.6';
+  document.getElementById('traceCreate').value = '';
+  document.getElementById('keteranganCreate').value = '';
+  document.getElementById('picCreate').value = '';
+}
+
+// ─── UPDATE OPERATION ──────────────────────
+async function updateRoll() {
+  const id = document.getElementById('updateId').value;
+  
+  if (!id) {
+    alert('Please enter Roll ID');
+    return;
+  }
+  
+  const payload = {};
+  if (document.getElementById('namaUpdate').value) payload.nama = document.getElementById('namaUpdate').value;
+  if (document.getElementById('beratUpdate').value) payload.berat = document.getElementById('beratUpdate').value;
+  if (document.getElementById('mesinUpdate').value) payload.mesin = document.getElementById('mesinUpdate').value;
+  if (document.getElementById('keteranganUpdate').value) payload.keterangan = document.getElementById('keteranganUpdate').value;
+  
+  if (Object.keys(payload).length === 0) {
+    alert('Please fill at least one field');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${BASE_URL}?action=update&id=${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    displayResponse('responseUpdate', data);
+  } catch (error) {
+    displayResponse('responseUpdate', { error: error.message }, true);
+  }
+}
+
+function resetUpdateForm() {
+  document.getElementById('updateId').value = '1';
+  document.getElementById('namaUpdate').value = '';
+  document.getElementById('beratUpdate').value = '';
+  document.getElementById('mesinUpdate').value = '';
+  document.getElementById('keteranganUpdate').value = '';
+}
+
+// ─── DELETE OPERATIONS ──────────────────────
+async function deleteRoll() {
+  const id = document.getElementById('deleteId').value;
+  
+  if (!id) {
+    alert('Please enter Roll ID');
+    return;
+  }
+  
+  if (!confirm(`Delete roll #${id}? This cannot be undone.`)) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${BASE_URL}?action=delete&id=${id}`, {
+      method: 'DELETE'
+    });
+    const data = await response.json();
+    displayResponse('responseDelete', data);
+  } catch (error) {
+    displayResponse('responseDelete', { error: error.message }, true);
+  }
+}
+
+async function deleteMultiple() {
+  const idsString = document.getElementById('deleteIds').value;
+  const ids = idsString.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+  
+  if (ids.length === 0) {
+    alert('Please enter valid IDs (comma-separated)');
+    return;
+  }
+  
+  if (!confirm(`Delete ${ids.length} rolls? This cannot be undone.`)) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${BASE_URL}?action=delete_multiple`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids })
+    });
+    const data = await response.json();
+    displayResponse('responseDeleteMultiple', data);
+  } catch (error) {
+    displayResponse('responseDeleteMultiple', { error: error.message }, true);
+  }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  clearResponse();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+# Backend .gitignore
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+error_log
+access_log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Composer
+vendor/
+composer.lock
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# OS
+Thumbs.db
+.DS_Store
