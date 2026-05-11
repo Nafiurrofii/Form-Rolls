@@ -3,8 +3,8 @@
    ──────────────────────────────────────────────────── */
 
 import { getDOMElement, formatNumber, showNotification } from '../utils.js';
-import { getCurrentPage, setCurrentPage, setSelectedRow } from '../state.js';
-import { setFormData, disableEditMode } from './form.js';
+import { getCurrentPage, setCurrentPage, setSelectedRow, setEditMode } from '../state.js';
+import { setFormData, toggleFormInputs } from './form.js';
 
 /**
  * Render table dengan data dan pagination
@@ -48,6 +48,7 @@ export function renderTable(data, perPage, totalVirtual) {
         <td>${row.br}</td>
         <td class="mono" style="font-size:11px">${row.trace}</td>
         <td>${row.reg}</td>
+        <td>${row.keterangan || ''}</td>
         <td>${row.user}</td>
       `;
       tr.style.cursor = 'pointer';
@@ -74,8 +75,12 @@ export function renderTable(data, perPage, totalVirtual) {
 function handleRowClick(row) {
   setSelectedRow(row);
   setFormData(row);
-  disableEditMode(); // Matikan mode edit/lanjut saat ganti data (pilih baris lain)
-  // showNotification(`Data baris #${row.roll} dimuat ke form`, 'info'); // Dihapus agar tidak ada popup alert
+  setEditMode(true); // Status internal Edit Mode tetap aktif agar tombol SIMPAN tahu ini update
+  toggleFormInputs(false); // Tapi visual form dikunci (disable) sampai klik EDIT/LANJUT
+
+  // Matikan status "active" pada tombol BARU jika ada
+  const btnBaru = document.querySelector('.btn-primary');
+  if (btnBaru) btnBaru.classList.remove('active');
 }
 
 /**

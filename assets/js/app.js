@@ -11,6 +11,7 @@ import { getPreferences, savePreferences } from './modules/storage.js';
 import { showNotification } from './utils.js';
 import { fetchRolls } from './modules/api.js';
 import { resetForm, attachTraceCodeListeners, startRealTimeClock } from './modules/form.js';
+import { setupPrintModal } from './components/printModal.js';
 
 /**
  * Initialize aplikasi
@@ -27,6 +28,7 @@ async function initializeApp() {
   attachButtonHandlers();
   attachTraceCodeListeners();
   startRealTimeClock();
+  setupPrintModal();
   
   // Kosongkan form pada saat awal aplikasi dimuat
   resetForm();

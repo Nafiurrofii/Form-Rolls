@@ -5,43 +5,48 @@
 /* ─── HEADER / TOPBAR ────────────────────────────── */
 .topbar {
   background: var(--blue-dark);
-  padding: 0 28px;
-  height: 56px;
+  padding: 0 16px;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .topbar-icon {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .topbar h1 {
   color: #fff;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: .5px;
 }
 
 /* ─── MAIN CONTAINER ────────────────────────────── */
 .main {
-  padding: 20px 24px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: calc(100vh - 40px);
+  overflow: hidden;
 }
 
 /* ─── CARD ──────────────────────────────────────── */
 .card {
   background: var(--white);
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: var(--shadow);
-  padding: 20px 24px;
-  margin-bottom: 20px;
+  padding: 10px 16px;
+  margin-bottom: 0;
 }
 
 /* ─── FORM GRID ────────────────────────────────── */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0 24px;
+  gap: 0 16px;
 }
 
 @media (max-width: 1100px) {
@@ -50,58 +55,41 @@
   }
 }
 
-@media (max-width: 640px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* ─── FORM SECTION ──────────────────────────────– */
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
 }
 
 .section-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .8px;
+  letter-spacing: .5px;
   color: var(--blue-main);
-  margin-bottom: 6px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 2px;
 }
 
 .section-title svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
-}
-
-.divider-v {
-  width: 1px;
-  background: var(--gray-border);
-  margin: 0 4px;
-  align-self: stretch;
-}
-
-/* ─── PERIODE & TOOLS SECTION ───────────────────– */
-.periode-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 /* ─── ACTION BAR ────────────────────────────────– */
 .action-bar {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-top: 22px;
-  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e8f0;
 }
 
 /* ─── DATA ROLL TABLE HEADER ────────────────────– */
@@ -109,67 +97,40 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+  margin-bottom: 8px;
 }
 
 .table-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .8px;
   color: var(--blue-main);
   flex: 1;
 }
 
-.show-entries {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--gray-mid);
-}
-
-.show-entries select {
-  width: 68px;
-  height: 34px;
-}
-
-/* ─── SEARCH WRAP ────────────────────────────────– */
-.search-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-wrap input {
-  height: 34px;
-  width: 200px;
-  padding-right: 34px;
-  font-size: 13px;
-}
-
-.search-wrap svg {
-  position: absolute;
-  right: 10px;
-  color: var(--gray-mid);
-  pointer-events: none;
-  width: 15px;
-  height: 15px;
-}
-
 /* ─── TABLE ─────────────────────────────────────– */
 .table-wrap {
-  overflow-x: auto;
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  min-height: 380px; /* Cukup untuk ~10 baris */
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 thead tr {
@@ -178,12 +139,12 @@ thead tr {
 }
 
 thead th {
-  padding: 10px 10px;
+  padding: 8px 6px;
   text-align: center;
   font-weight: 600;
-  font-size: 12px;
-  letter-spacing: .4px;
+  font-size: 11px;
   white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.1);
 }
 
 tbody tr {
@@ -191,20 +152,21 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: var(--blue-light);
+  background: #f8fafc;
 }
 
 tbody td {
-  padding: 9px 10px;
+  padding: 6px 8px;
   text-align: center;
-  font-size: 12.5px;
-  color: var(--gray-dark);
+  font-size: 12px;
+  color: #334155;
   white-space: nowrap;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 tbody td.mono {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 /* ─── TABLE FOOTER & PAGINATION ────────────────– */
@@ -212,10 +174,8 @@ tbody td.mono {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 16px;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 13px;
+  padding-top: 8px;
+  font-size: 12px;
   color: var(--gray-mid);
 }
 
@@ -224,3 +184,4 @@ tbody td.mono {
   align-items: center;
   gap: 4px;
 }
+

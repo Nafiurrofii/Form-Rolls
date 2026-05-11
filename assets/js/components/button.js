@@ -3,9 +3,10 @@
    ──────────────────────────────────────────────────── */
 
 import { showNotification, confirmAction, setMultipleValues } from '../utils.js';
-import { getFormData, setFormData, resetForm, validateForm, enableEditMode, disableEditMode, updateTraceCode, updateTimeNow } from '../modules/form.js';
+import { getFormData, setFormData, resetForm, validateForm, enableEditMode, disableEditMode, updateTraceCode, updateTimeNow, toggleFormInputs } from '../modules/form.js';
 import { saveRoll } from '../modules/api.js';
 import { isEditMode, setEditMode, getSelectedRow } from '../state.js';
+import { openPrintModal } from './printModal.js';
 // NOTE: Do NOT import storage functions - we save to DATABASE via API, not localStorage!
 
 /**
@@ -66,8 +67,21 @@ export function attachButtonHandlers() {
  */
 
 function handleBaru() {
-  if (confirmAction('Kosongkan semua field?')) {
+  const btnBaru = document.querySelector('.btn-primary');
+  if (!btnBaru) return;
+
+  const wasActive = btnBaru.classList.contains('active');
+
+  if (wasActive) {
+    // Jika sudah aktif, klik lagi untuk mematikan mode BARU (Kembali ke Normal)
     resetForm();
+    showNotification('Mode Baru dibatalkan', 'info');
+  } else {
+    // Jika belum aktif, aktifkan mode BARU
+    resetForm(); 
+    btnBaru.classList.add('active');
+    toggleFormInputs(true, 'full'); // Buka kunci input penuh untuk data baru
+    showNotification('Silakan input data baru', 'info');
   }
 }
 
@@ -100,19 +114,25 @@ async function handleSimpan() {
       console.log('✅ BERHASIL MENYIMPAN KE DATABASE! ID:', result.data?.id);
       const successMsg = '✅ Data berhasil ' + (editing ? 'diperbarui' : 'disimpan') + ' ke DATABASE!';
       showNotification(successMsg, 'success');
-      alert(successMsg);
-      
-      // Refresh tabel data agar yang baru tersimpan muncul
+
+      // Refresh tabel data
       if (window.formRollApp && typeof window.formRollApp.refreshTableData === 'function') {
         console.log('🔄 Refresh tabel data...');
         await window.formRollApp.refreshTableData();
       }
-      
-      if (editing) {
-        disableEditMode();
-      }
-      
-      // Reset form setelah simpan
+
+      if (editing) disableEditMode();
+
+      // Buka print modal dengan data yang baru disimpan
+      openPrintModal({
+        ...formData,
+        // Barcode dan Register otomatis sama dengan nilai URUT dari database
+        // Jika sedang EDIT, ambil dari data yang sudah ada di baris tersebut
+        register: editing ? (selected.reg || '—') : (result.data?.id || '—'),
+        barcode: editing ? (selected.barcode || '—') : (result.data?.id || '—')
+      });
+
+      // Reset form setelah modal dibuka
       resetForm(); 
     } else {
       throw new Error('API returned non-success status: ' + result.status);
@@ -145,6 +165,9 @@ function handleLanjut() {
     // Mode ON: Aktifkan mode edit dulu baru update nilai
     setEditMode(true);
     
+    // Hanya buka input tertentu untuk mode Lanjut
+    toggleFormInputs(true, 'lanjut');
+    
     // Update jam ke waktu sekarang agar trace code real-time
     updateTimeNow();
     
@@ -156,13 +179,14 @@ function handleLanjut() {
     
     showNotification('Mode Lanjut: Roll +1', 'info');
   } else {
-    // Mode OFF: Matikan mode edit dan kembalikan data ke nilai awal
-    setEditMode(false);
+    // Mode OFF: Kembalikan form ke status terkunci (disable)
+    setEditMode(true); 
+    toggleFormInputs(false); 
     
     // Reset form ke data asli baris yang dipilih
     setFormData(selected);
     
-    showNotification('Mode Lanjut: Kembali ke nilai awal', 'info');
+    showNotification('Mode Lanjut: Dimatikan (Form Terkunci)', 'info');
   }
 }
 

@@ -57,11 +57,11 @@ export async function saveRoll(data, id = null) {
     group_name: data.group || '',
     mesin: data.mesin || '',
     nama: data.nama || '',
-    denier: parseInt(data.denier) || 0,
+    denier: data.denier || '',
     panjang: parseInt(data.panjang) || 0,
     lebar: parseInt(data.lebar) || 0,
     anyam: data.anyam || '',
-    berat: parseFloat(data.berat) || 0,
+    berat: data.berat || '',
     trace_code: data.kode_trace || '',
     keterangan: data.keterangan || '',
     pic: data.pic || ''

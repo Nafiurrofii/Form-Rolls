@@ -9,24 +9,39 @@ input[type="time"],
 input[type="number"],
 select {
   width: 100%;
-  height: 36px;
-  border: 1.5px solid var(--gray-border);
-  border-radius: var(--radius);
-  padding: 0 10px;
-  font-size: 13px;
+  height: 44px; /* Blue Modern Style */
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 14px;
   font-family: var(--font-main);
-  color: var(--gray-dark);
+  color: #0f172a;
   background: var(--white);
   outline: none;
-  transition: border-color .2s, box-shadow .2s;
+  transition: all 0.3s ease;
   appearance: none;
   -webkit-appearance: none;
 }
 
 input:focus,
 select:focus {
-  border-color: var(--blue-mid);
-  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+}
+
+.readonly-field {
+  background-color: #eff6ff !important;
+  color: #64748b !important;
+  border-color: #bfdbfe !important;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+select:disabled {
+  background-color: #eff6ff !important;
+  color: #64748b !important;
+  border-color: #bfdbfe !important;
+  cursor: not-allowed;
 }
 
 select {
@@ -111,6 +126,17 @@ select {
 }
 
 .btn-primary  { background: var(--blue-mid);   color: #fff; }
+.btn-primary.active { 
+  background: linear-gradient(135deg, #059669, #10b981); 
+  box-shadow: 0 4px 12px rgba(16,185,129,0.35);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.btn-primary.active::after {
+  content: ' MODE BARU';
+  font-size: 10px;
+  font-weight: 800;
+  opacity: 0.8;
+}
 .btn-success  { background: var(--green-main); color: #fff; }
 .btn-warning  { background: var(--white); color: var(--yellow-main); border: 1.5px solid var(--yellow-main); }
 .btn-danger   { background: var(--white); color: var(--red-main);    border: 1.5px solid var(--red-main); }

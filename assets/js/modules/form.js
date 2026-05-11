@@ -58,25 +58,41 @@ export function resetForm() {
   setSelectedRow(null);
   disableEditMode(); // Memastikan UI reset (termasuk tombol Lanjut)
 
+  // Reset status tombol BARU
+  const btnBaru = document.querySelector('.btn-primary');
+  if (btnBaru) btnBaru.classList.remove('active');
+
+  toggleFormInputs(true, 'lanjut'); // Sesuai permintaan: mode netral hanya buka 6 field
   updateTimeNow();
   showNotification('Form dikosongkan.', 'info');
 }
 
 /**
- * Update field jam ke waktu sekarang
+ * Update field jam & tanggal ke waktu sekarang
  */
 export function updateTimeNow() {
   const jamInput = getDOMElement('jam');
+  const tglInput = getDOMElement('tanggal');
+  const now = new Date();
+
+  // Update Jam
   if (jamInput) {
-    const now = new Date();
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
     jamInput.value = `${h}:${m}:${s}`;
-    
-    // Update trace code juga jika memungkinkan
-    updateTraceCode();
   }
+
+  // Update Tanggal (hanya jika kosong, atau saat mode BARU)
+  if (tglInput && (!tglInput.value || (!getSelectedRow() && !isEditMode()))) {
+    const y = now.getFullYear();
+    const mo = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    tglInput.value = `${y}-${mo}-${d}`;
+  }
+  
+  // Update trace code juga jika memungkinkan
+  updateTraceCode();
 }
 
 /**
@@ -132,7 +148,7 @@ export function validateForm() {
   }
 
   // Validasi angka positif untuk field tertentu
-  const numericFields = { 'denier': 'Denier', 'panjang': 'Panjang', 'lebar': 'Lebar', 'berat': 'Berat' };
+  const numericFields = { 'panjang': 'Panjang', 'lebar': 'Lebar' };
   for (const [field, label] of Object.entries(numericFields)) {
     if (formData[field] && (isNaN(formData[field]) || parseFloat(formData[field]) < 0)) {
       showNotification(`${label} harus berupa angka positif`, 'warning');
@@ -151,10 +167,12 @@ export function enableEditMode() {
   if (editBtnMsg) editBtnMsg.value = 'Lanjut';
 
   const btnLanjut = document.querySelector('.btn-lanjut');
+  // Jangan langsung active, biarkan user klik manual jika ingin mode Lanjut
   if (btnLanjut) {
-    btnLanjut.classList.add('active');
+    btnLanjut.classList.remove('active');
   }
 
+  toggleFormInputs(true); // Buka form saat edit
   setEditMode(true);
 }
 
@@ -216,6 +234,41 @@ export function updateTraceCode() {
   if (traceInput) {
     traceInput.value = traceCode;
   }
+}
+
+/**
+ * Aktifkan atau nonaktifkan semua input form
+ * @param {boolean} enabled 
+ * @param {string} mode - 'full' atau 'lanjut'
+ */
+export function toggleFormInputs(enabled, mode = 'full') {
+  const editableInLanjut = ['mesin', 'panjang', 'lebar', 'berat', 'group', 'pic'];
+
+  formFieldIds.forEach(id => {
+    const el = getDOMElement(id);
+    if (!el) return;
+
+    let shouldEnable = enabled;
+    
+    // Jika mode lanjut, hanya field tertentu yang bisa diedit
+    if (enabled && mode === 'lanjut') {
+      shouldEnable = editableInLanjut.includes(id);
+    }
+
+    el.readOnly = !shouldEnable;
+    
+    // Khusus untuk select (group, mesin)
+    if (['group', 'mesin'].includes(id)) {
+      el.disabled = !shouldEnable;
+    }
+
+    // Beri style visual jika readonly/disabled
+    if (!shouldEnable) {
+      el.classList.add('readonly-field');
+    } else {
+      el.classList.remove('readonly-field');
+    }
+  });
 }
 
 /**

@@ -12,7 +12,6 @@ class Roll {
      * GET ALL DATA
      */
     public function getAll() {
-
         $sql = "SELECT 
                     id,
                     tanggal AS tgl,
@@ -27,13 +26,14 @@ class Roll {
                     anyam,
                     berat AS br,
                     trace_code AS trace,
-                    register_no AS reg,
+                    register AS reg,
+                    barcode,
+                    keterangan,
                     pic AS user
                 FROM rolls
                 ORDER BY id DESC";
 
         $stmt = $this->pdo->query($sql);
-
         return $stmt->fetchAll();
     }
 
@@ -41,8 +41,8 @@ class Roll {
      * STORE DATA
      */
     public function store($data) {
-
         $sql = "INSERT INTO rolls (
+                    id,
                     tanggal,
                     jam,
                     roll,
@@ -55,8 +55,10 @@ class Roll {
                     anyam,
                     berat,
                     trace_code,
+                    keterangan,
                     pic
                 ) VALUES (
+                    UUID(),
                     :tanggal,
                     :jam,
                     :roll,
@@ -69,11 +71,11 @@ class Roll {
                     :anyam,
                     :berat,
                     :trace_code,
+                    :keterangan,
                     :pic
                 )";
 
         $stmt = $this->pdo->prepare($sql);
-
         $stmt->execute([
             ':tanggal' => $data['tanggal'],
             ':jam' => $data['jam'],
@@ -87,11 +89,22 @@ class Roll {
             ':anyam' => $data['anyam'],
             ':berat' => $data['berat'],
             ':trace_code' => $data['trace_code'],
+            ':keterangan' => $data['keterangan'],
             ':pic' => $data['pic']
         ]);
 
+        $lastUrut = $this->pdo->lastInsertId();
+
+        // Update register dan barcode otomatis sama dengan urut
+        $updateSql = "UPDATE rolls SET register = :val, barcode = :val WHERE urut = :urut";
+        $updateStmt = $this->pdo->prepare($updateSql);
+        $updateStmt->execute([
+            ':val' => $lastUrut,
+            ':urut' => $lastUrut
+        ]);
+
         return [
-            'id' => $this->pdo->lastInsertId()
+            'id' => $lastUrut
         ];
     }
 
@@ -99,7 +112,6 @@ class Roll {
      * UPDATE DATA
      */
     public function update($id, $data) {
-
         $sql = "UPDATE rolls SET
                     tanggal = :tanggal,
                     jam = :jam,
@@ -113,11 +125,11 @@ class Roll {
                     anyam = :anyam,
                     berat = :berat,
                     trace_code = :trace_code,
+                    keterangan = :keterangan,
                     pic = :pic
                 WHERE id = :id";
 
         $stmt = $this->pdo->prepare($sql);
-
         $stmt->execute([
             ':id' => $id,
             ':tanggal' => $data['tanggal'],
@@ -132,6 +144,7 @@ class Roll {
             ':anyam' => $data['anyam'],
             ':berat' => $data['berat'],
             ':trace_code' => $data['trace_code'],
+            ':keterangan' => $data['keterangan'],
             ':pic' => $data['pic']
         ]);
 
