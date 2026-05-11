@@ -3,11 +3,11 @@
    ──────────────────────────────────────────────────── */
 
 import { setMultipleValues, clearMultipleValues, getMultipleValues, getDOMElement, showNotification } from '../utils.js';
-import { setSelectedRow, setEditMode } from '../state.js';
+import { setSelectedRow, setEditMode, getSelectedRow, isEditMode } from '../state.js';
 
 // Field IDs untuk form
 const formFieldIds = [
-  'tanggal', 'jam', 'roll_ke', 'group', 'mesin', 'lanjut',
+  'tanggal', 'jam', 'roll_ke', 'group', 'mesin',
   'nama', 'denier', 'panjang', 'lebar',
   'anyam', 'berat', 'kode_trace', 'keterangan', 'pic'
 ];
@@ -25,9 +25,15 @@ export function getFormData() {
  * @param {object} data - Data yang akan diisi ke form
  */
 export function setFormData(data) {
+  // Ambil jam real-time saat ini
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const currentTime = `${hours}:${minutes}`;
+
   const mappedData = {
     'tanggal': data.tgl,
-    'jam': data.jam ? data.jam.substring(0, 5) : '',
+    'jam': currentTime,
     'roll_ke': data.roll,
     'group': data.shift,
     'mesin': data.mesin,
@@ -50,8 +56,40 @@ export function setFormData(data) {
 export function resetForm() {
   clearMultipleValues(formFieldIds);
   setSelectedRow(null);
-  setEditMode(false);
+  disableEditMode(); // Memastikan UI reset (termasuk tombol Lanjut)
+
+  updateTimeNow();
   showNotification('Form dikosongkan.', 'info');
+}
+
+/**
+ * Update field jam ke waktu sekarang
+ */
+export function updateTimeNow() {
+  const jamInput = getDOMElement('jam');
+  if (jamInput) {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    jamInput.value = `${h}:${m}:${s}`;
+    
+    // Update trace code juga jika memungkinkan
+    updateTraceCode();
+  }
+}
+
+/**
+ * Menjalankan clock real-time jika sedang mode BARU (tidak ada baris terpilih)
+ */
+export function startRealTimeClock() {
+  setInterval(() => {
+    // Hanya update otomatis jika sedang tidak mengedit data yang sudah ada
+    // (Agar jam tidak loncat saat user sedang melihat/mengedit data lama)
+    if (!getSelectedRow() && !isEditMode()) {
+      updateTimeNow();
+    }
+  }, 1000);
 }
 
 /**
@@ -110,7 +148,13 @@ export function validateForm() {
  */
 export function enableEditMode() {
   const editBtnMsg = getDOMElement('lanjut');
-  if (editBtnMsg) editBtnMsg.value = 'Mode Edit Aktif';
+  if (editBtnMsg) editBtnMsg.value = 'Lanjut';
+
+  const btnLanjut = document.querySelector('.btn-lanjut');
+  if (btnLanjut) {
+    btnLanjut.classList.add('active');
+  }
+
   setEditMode(true);
 }
 
@@ -119,7 +163,13 @@ export function enableEditMode() {
  */
 export function disableEditMode() {
   const editBtnMsg = getDOMElement('lanjut');
-  if (editBtnMsg) editBtnMsg.value = 'Edit';
+  if (editBtnMsg) editBtnMsg.value = 'Lanjut';
+
+  const btnLanjut = document.querySelector('.btn-lanjut');
+  if (btnLanjut) {
+    btnLanjut.classList.remove('active');
+  }
+
   setEditMode(false);
 }
 
@@ -129,4 +179,55 @@ export function disableEditMode() {
 export function focusFirstField() {
   const elem = getDOMElement(formFieldIds[0]);
   if (elem) elem.focus();
+}
+
+/**
+ * Update kode trace secara otomatis berdasarkan tanggal, jam, group, mesin, roll_ke
+ */
+export function updateTraceCode() {
+  // Generate otomatis hanya jika:
+  // 1. Tidak ada baris yang dipilih (Mode BARU)
+  // 2. ATAU sedang dalam mode edit/lanjut (isEditMode)
+  if (getSelectedRow() && !isEditMode()) {
+    return;
+  }
+
+  const tanggal = getDOMElement('tanggal')?.value || '';
+  const jam = getDOMElement('jam')?.value || '';
+  const group = getDOMElement('group')?.value || '';
+  const mesin = getDOMElement('mesin')?.value || '';
+  const roll = getDOMElement('roll_ke')?.value || '';
+
+  if (!tanggal || !jam || !group || !mesin || !roll) return;
+
+  // Format tanggal: YYYY-MM-DD -> YYMMDD
+  const tglParts = tanggal.split('-');
+  let tglFormatted = '';
+  if (tglParts.length === 3) {
+    tglFormatted = tglParts[0].substring(2) + tglParts[1] + tglParts[2];
+  }
+
+  // Format jam: HH:MM -> HHMM
+  const jamFormatted = jam.replace(':', '').substring(0, 4);
+
+  const traceCode = `${tglFormatted}-${jamFormatted}-${group}-${mesin}-${roll}`;
+  
+  const traceInput = getDOMElement('kode_trace');
+  if (traceInput) {
+    traceInput.value = traceCode;
+  }
+}
+
+/**
+ * Pasang event listener untuk update otomatis kode trace
+ */
+export function attachTraceCodeListeners() {
+  const fields = ['tanggal', 'jam', 'group', 'mesin', 'roll_ke'];
+  fields.forEach(id => {
+    const el = getDOMElement(id);
+    if (el) {
+      el.addEventListener('input', updateTraceCode);
+      el.addEventListener('change', updateTraceCode);
+    }
+  });
 }

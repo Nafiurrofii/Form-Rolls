@@ -10,7 +10,7 @@ import { attachButtonHandlers } from './components/button.js';
 import { getPreferences, savePreferences } from './modules/storage.js';
 import { showNotification } from './utils.js';
 import { fetchRolls } from './modules/api.js';
-import { resetForm } from './modules/form.js';
+import { resetForm, attachTraceCodeListeners, startRealTimeClock } from './modules/form.js';
 
 /**
  * Initialize aplikasi
@@ -25,6 +25,8 @@ async function initializeApp() {
   await refreshTableData();
 
   attachButtonHandlers();
+  attachTraceCodeListeners();
+  startRealTimeClock();
   
   // Kosongkan form pada saat awal aplikasi dimuat
   resetForm();

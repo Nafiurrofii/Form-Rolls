@@ -4,7 +4,7 @@
 
 import { getDOMElement, formatNumber, showNotification } from '../utils.js';
 import { getCurrentPage, setCurrentPage, setSelectedRow } from '../state.js';
-import { setFormData } from './form.js';
+import { setFormData, disableEditMode } from './form.js';
 
 /**
  * Render table dengan data dan pagination
@@ -74,6 +74,7 @@ export function renderTable(data, perPage, totalVirtual) {
 function handleRowClick(row) {
   setSelectedRow(row);
   setFormData(row);
+  disableEditMode(); // Matikan mode edit/lanjut saat ganti data (pilih baris lain)
   // showNotification(`Data baris #${row.roll} dimuat ke form`, 'info'); // Dihapus agar tidak ada popup alert
 }
 

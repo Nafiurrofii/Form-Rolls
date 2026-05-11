@@ -2,10 +2,10 @@
    COMPONENTS: BUTTON - Reusable Button Component
    ──────────────────────────────────────────────────── */
 
-import { showNotification, confirmAction } from '../utils.js';
-import { getFormData, resetForm, validateForm, enableEditMode, disableEditMode } from '../modules/form.js';
+import { showNotification, confirmAction, setMultipleValues } from '../utils.js';
+import { getFormData, setFormData, resetForm, validateForm, enableEditMode, disableEditMode, updateTraceCode, updateTimeNow } from '../modules/form.js';
 import { saveRoll } from '../modules/api.js';
-import { isEditMode, getSelectedRow } from '../state.js';
+import { isEditMode, setEditMode, getSelectedRow } from '../state.js';
 // NOTE: Do NOT import storage functions - we save to DATABASE via API, not localStorage!
 
 /**
@@ -43,9 +43,9 @@ export function attachButtonHandlers() {
   }
 
   // Edit button dalam form
-  const btnFormEdit = document.querySelector('.btn-sm');
+  const btnFormEdit = document.querySelector('.btn-lanjut');
   if (btnFormEdit) {
-    btnFormEdit.addEventListener('click', handleEdit);
+    btnFormEdit.addEventListener('click', handleLanjut);
   }
 
   // LIHAT button
@@ -124,9 +124,46 @@ async function handleSimpan() {
   }
 }
 
-function handleEdit() {
-  enableEditMode();
-  showNotification('Mode edit diaktifkan.', 'info');
+function handleLanjut() {
+  const btnLanjut = document.querySelector('.btn-lanjut');
+  if (!btnLanjut) return;
+
+  const selected = getSelectedRow();
+  
+  // Jika tidak ada data yang dipilih di tabel, jangan aktifkan mode lanjut
+  if (!selected) {
+    showNotification('Pilih data di tabel terlebih dahulu', 'warning');
+    // Pastikan UI tidak dalam status active jika gagal
+    btnLanjut.classList.remove('active');
+    return;
+  }
+
+  // Gunakan toggle UI
+  const isActive = btnLanjut.classList.toggle('active');
+
+  if (isActive) {
+    // Mode ON: Aktifkan mode edit dulu baru update nilai
+    setEditMode(true);
+    
+    // Update jam ke waktu sekarang agar trace code real-time
+    updateTimeNow();
+    
+    // Set nilai roll_ke menjadi (nilai asli + 1)
+    const nextRoll = parseInt(selected.roll || 0) + 1;
+    
+    setMultipleValues({ 'roll_ke': nextRoll });
+    updateTraceCode();
+    
+    showNotification('Mode Lanjut: Roll +1', 'info');
+  } else {
+    // Mode OFF: Matikan mode edit dan kembalikan data ke nilai awal
+    setEditMode(false);
+    
+    // Reset form ke data asli baris yang dipilih
+    setFormData(selected);
+    
+    showNotification('Mode Lanjut: Kembali ke nilai awal', 'info');
+  }
 }
 
 function handleEditAction() {
