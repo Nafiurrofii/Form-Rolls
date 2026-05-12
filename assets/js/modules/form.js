@@ -58,13 +58,19 @@ export function resetForm() {
   setSelectedRow(null);
   disableEditMode(); // Memastikan UI reset (termasuk tombol Lanjut)
 
-  // Reset status tombol BARU
+  // Reset status tombol BARU & LANJUT
   const btnBaru = document.querySelector('.btn-primary');
   if (btnBaru) btnBaru.classList.remove('active');
 
+  const btnLanjut = document.querySelector('.btn-lanjut');
+  if (btnLanjut) btnLanjut.classList.remove('active');
+
+  const inputLanjut = document.getElementById('lanjut');
+  if (inputLanjut) inputLanjut.value = 'Lanjut';
+
   toggleFormInputs(true, 'lanjut'); // Sesuai permintaan: mode netral hanya buka 6 field
   updateTimeNow();
-  showNotification('Form dikosongkan.', 'info');
+  // showNotification('Form dikosongkan.', 'info');
 }
 
 /**

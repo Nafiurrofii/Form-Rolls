@@ -1,187 +1,661 @@
-/* ─────────────────────────────────────────────────────
-   MAIN - Layout, Structure, Page Grid
-   ──────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   MAIN — Layout, Page Structure, Table, Header
+   Form Roll | Industrial ERP Dashboard
+   ═══════════════════════════════════════════════════════ */
 
-/* ─── HEADER / TOPBAR ────────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   TOPBAR / APPLICATION HEADER
+   ════════════════════════════════════════════════════════ */
 .topbar {
-  background: var(--blue-dark);
-  padding: 0 16px;
-  height: 40px;
+  background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-dark) 60%, #1a3a9e 100%);
+  height: var(--h-topbar);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(10, 20, 80, 0.18);
+  /* Subtle grid pattern */
+  background-image:
+    linear-gradient(135deg, var(--blue-900) 0%, var(--blue-dark) 60%, #1a3a9e 100%),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.topbar-brand {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
 }
 
-.topbar-icon {
-  font-size: 20px;
+.topbar-icon-wrap {
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.topbar-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .topbar h1 {
   color: #fff;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: .5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  line-height: 1.2;
 }
 
-/* ─── MAIN CONTAINER ────────────────────────────── */
-.main {
-  padding: 8px 12px;
+.topbar-sub {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+.topbar-meta {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  height: calc(100vh - 40px);
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.80);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+.topbar-badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #4ade80;
+  animation: pulse-dot 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.topbar-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ════════════════════════════════════════════════════════
+   PAGE WRAPPER
+   ════════════════════════════════════════════════════════ */
+.main {
+  padding: 12px 14px;
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+/* ════════════════════════════════════════════════════════
+   CARD — Base container
+   ════════════════════════════════════════════════════════ */
+.card {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-soft);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+/* ════════════════════════════════════════════════════════
+   FORM PANEL — Card khusus form input
+   ════════════════════════════════════════════════════════ */
+.card-form {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-soft);
+  padding: 0;
+  margin-bottom: 10px;
   overflow: hidden;
 }
 
-/* ─── CARD ──────────────────────────────────────── */
-.card {
-  background: var(--white);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
+.card-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 10px 16px;
-  margin-bottom: 0;
+  background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid var(--border-soft);
 }
 
-/* ─── FORM GRID ────────────────────────────────── */
+.card-form-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-700);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-form-title svg {
+  width: 15px;
+  height: 15px;
+  color: var(--blue-mid);
+}
+
+.card-form-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  background: var(--blue-50);
+  border: 1px solid var(--blue-light);
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--blue-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-form-body {
+  padding: 14px 16px 0;
+}
+
+/* ════════════════════════════════════════════════════════
+   FORM GRID — 4 columns layout
+   ════════════════════════════════════════════════════════ */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0 16px;
+  gap: 12px;
+  align-items: stretch;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .form-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* ─── FORM SECTION ──────────────────────────────– */
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   FORM SECTION — Panel individual tiap group field
+   ════════════════════════════════════════════════════════ */
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
+  background: var(--surface-panel);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--blue-mid);
+  position: relative;
 }
 
+/* Variasi warna border kiri tiap section */
+.form-section:nth-child(1) {
+  border-left-color: var(--blue-mid);
+}
+
+.form-section:nth-child(2) {
+  border-left-color: #7c3aed;
+}
+
+.form-section:nth-child(3) {
+  border-left-color: var(--green-main);
+}
+
+.form-section:nth-child(4) {
+  border-left-color: var(--orange-main);
+}
+
+/* Section "Periode & Tools" */
+.periode-section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* ════════════════════════════════════════════════════════
+   SECTION TITLE
+   ════════════════════════════════════════════════════════ */
 .section-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  color: var(--blue-main);
+  gap: 7px;
+  padding-bottom: 8px;
   margin-bottom: 2px;
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 2px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
 }
 
 .section-title svg {
   width: 14px;
   height: 14px;
+  color: var(--blue-mid);
   flex-shrink: 0;
 }
 
-/* ─── ACTION BAR ────────────────────────────────– */
-.action-bar {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px dashed #e2e8f0;
+.section-title span {
+  display: inline;
+  /* Tampilkan text label */
 }
 
-/* ─── DATA ROLL TABLE HEADER ────────────────────– */
+/* Warna icon tiap section */
+.form-section:nth-child(1) .section-title svg {
+  color: var(--blue-mid);
+}
+
+.form-section:nth-child(2) .section-title svg {
+  color: #7c3aed;
+}
+
+.form-section:nth-child(3) .section-title svg {
+  color: var(--green-main);
+}
+
+.form-section:nth-child(4) .section-title svg {
+  color: var(--orange-main);
+}
+
+/* ════════════════════════════════════════════════════════
+   ACTION BAR — Toolbar tombol aksi
+   ════════════════════════════════════════════════════════ */
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
+  border-top: 1px solid var(--border-soft);
+  flex-wrap: wrap;
+}
+
+.action-bar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-mid);
+  margin: 0 4px;
+}
+
+/* ════════════════════════════════════════════════════════
+   TABLE CARD
+   ════════════════════════════════════════════════════════ */
+.card-table {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+/* ════════════════════════════════════════════════════════
+   TABLE HEADER BAR
+   ════════════════════════════════════════════════════════ */
 .table-header-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid var(--border-soft);
+  flex-wrap: nowrap;
 }
 
 .table-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.8px;
   color: var(--blue-main);
+  white-space: nowrap;
   flex: 1;
 }
 
-/* ─── TABLE ─────────────────────────────────────– */
+.table-title svg {
+  width: 15px;
+  height: 15px;
+  color: var(--blue-mid);
+  flex-shrink: 0;
+}
+
+.table-count-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  background: var(--blue-light);
+  border: 1px solid #bfdbfe;
+  color: var(--blue-main);
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.table-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ─── SHOW ENTRIES ─────────────────────────────────── */
+.show-entries {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--gray-500);
+  white-space: nowrap;
+}
+
+.show-entries select {
+  width: 58px;
+  height: var(--h-btn-sm);
+  font-size: 11px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── SEARCH WRAP ──────────────────────────────────── */
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-wrap input {
+  height: var(--h-btn-sm);
+  width: 180px;
+  padding: 0 28px 0 10px;
+  font-size: 11px;
+  border-radius: var(--radius-sm);
+}
+
+.search-wrap svg {
+  position: absolute;
+  right: 9px;
+  color: var(--gray-400);
+  pointer-events: none;
+  width: 13px;
+  height: 13px;
+}
+
+/* ════════════════════════════════════════════════════════
+   TABLE CONTENT
+   ════════════════════════════════════════════════════════ */
 .table-wrap {
-  flex: 1;
+  overflow-x: auto;
   overflow-y: auto;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  min-height: 380px; /* Cukup untuk ~10 baris */
+}
+
+.table-wrap::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 99px;
 }
 
 table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   font-size: 12px;
 }
 
+/* ─── TABLE HEADER ─────────────────────────────────── */
 thead {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 10;
 }
 
 thead tr {
   background: var(--blue-dark);
-  color: #fff;
 }
 
 thead th {
-  padding: 8px 6px;
+  padding: 7px 8px;
   text-align: center;
   font-weight: 600;
-  font-size: 11px;
+  font-size: 10.5px;
+  letter-spacing: 0.4px;
   white-space: nowrap;
-  border-right: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255, 255, 255, 0.92);
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
 }
 
+thead th:last-child {
+  border-right: none;
+}
+
+/* ─── TABLE BODY ───────────────────────────────────── */
 tbody tr {
-  border-bottom: 1px solid #edf0f5;
+  border-bottom: 1px solid #f0f4f8;
+  transition: background var(--transition);
+}
+
+/* Zebra rows */
+tbody tr:nth-child(even) {
+  background: #fafbfd;
+}
+
+tbody tr:nth-child(odd) {
+  background: #ffffff;
 }
 
 tbody tr:hover {
-  background: #f8fafc;
+  background: var(--blue-50) !important;
+  cursor: pointer;
+}
+
+tbody tr.selected-row {
+  background: var(--blue-light) !important;
+  outline: 1px solid var(--blue-mid);
+  outline-offset: -1px;
 }
 
 tbody td {
-  padding: 6px 8px;
+  padding: 5px 8px;
   text-align: center;
-  font-size: 12px;
-  color: #334155;
+  font-size: 11.5px;
+  color: var(--gray-700);
   white-space: nowrap;
-  border-bottom: 1px solid #f1f5f9;
+  border-right: 1px solid #f0f4f8;
+}
+
+tbody td:last-child {
+  border-right: none;
 }
 
 tbody td.mono {
   font-family: var(--font-mono);
   font-size: 11px;
+  letter-spacing: 0.3px;
 }
 
-/* ─── TABLE FOOTER & PAGINATION ────────────────– */
+/* No. column */
+tbody td:first-child {
+  color: var(--gray-400);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+/* ════════════════════════════════════════════════════════
+   TABLE FOOTER — Info & Pagination
+   ════════════════════════════════════════════════════════ */
 .table-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 8px;
-  font-size: 12px;
-  color: var(--gray-mid);
+  padding: 8px 14px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border-soft);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#table_info {
+  font-size: 11px;
+  color: var(--gray-500);
+  font-family: var(--font-mono);
 }
 
 .pagination {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
+/* ════════════════════════════════════════════════════════
+   PERIOD SECTION TOOLS
+   ════════════════════════════════════════════════════════ */
+.periode-tools {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-tool {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--h-btn);
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid;
+  background: var(--white);
+  transition: all var(--transition);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.btn-tool svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.btn-tool.lihat {
+  color: var(--blue-mid);
+  border-color: var(--blue-mid);
+}
+
+.btn-tool.lihat:hover {
+  background: var(--blue-mid);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+}
+
+.btn-tool.excel {
+  color: var(--green-main);
+  border-color: var(--green-main);
+}
+
+.btn-tool.excel:hover {
+  background: var(--green-main);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(22, 163, 74, 0.25);
+}
+
+/* ════════════════════════════════════════════════════════
+   DIVIDER UTILITIES
+   ════════════════════════════════════════════════════════ */
+.divider-v {
+  width: 1px;
+  background: var(--border-mid);
+  margin: 0 4px;
+  align-self: stretch;
+}
+
+/* ════════════════════════════════════════════════════════
+   RESPONSIVE — Tablet
+   ════════════════════════════════════════════════════════ */
+@media (max-width: 1200px) {
+  .main {
+    padding: 10px 10px;
+  }
+
+  .table-header-bar {
+    flex-wrap: wrap;
+  }
+
+  .table-controls {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 8px;
+  }
+
+  .topbar h1 {
+    font-size: 13px;
+  }
+
+  .topbar-sub,
+  .topbar-meta {
+    display: none;
+  }
+
+  .action-bar {
+    gap: 6px;
+  }
+}

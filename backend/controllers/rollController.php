@@ -7,8 +7,11 @@ require_once __DIR__ . '/../models/Roll.php';
  */
 function getRolls($pdo) {
     try {
+        $startDate = $_GET['start'] ?? null;
+        $endDate = $_GET['end'] ?? null;
+
         $roll = new Roll($pdo);
-        $data = $roll->getAll();
+        $data = $roll->getAll($startDate, $endDate);
 
         echo json_encode([
             'status' => 'success',

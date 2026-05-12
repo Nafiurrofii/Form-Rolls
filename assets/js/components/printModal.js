@@ -2,8 +2,8 @@
    COMPONENTS: PRINT MODAL - Thermal Label Print Modal
    ──────────────────────────────────────────────────── */
 
-let _traceCode  = '';
-let _printData  = {}; // Simpan data terakhir untuk nama file PDF
+let _traceCode = '';
+let _printData = {}; // Simpan data terakhir untuk nama file PDF
 let _toastTimer = null;
 
 /* ──────────────────────────────────────────────────────
@@ -15,48 +15,72 @@ let _toastTimer = null;
 ─────────────────────────────────────────────────────── */
 export function openPrintModal(data = {}) {
   _traceCode = data.kode_trace || '';
-  _printData = data; // simpan referensi untuk nama file PDF
+  _printData = data;
 
-  /* Fill thermal fields */
-  _setT('printTanggal',    data.tanggal     || '—');
-  _setT('printJam',        data.jam         || '—');
-  _setT('printGroup',      data.group       || '—');
-  _setT('printPic',        data.pic         || '—');
-  _setT('printNama',       data.nama        || '—');
-  _setT('printRoll',       data.roll_ke     || '—');
-  _setT('printRegister',   data.register    || '—');
-  _setT('printPanjang',    data.panjang     || '—');
-  _setT('printLebar',      data.lebar       || '—');
-  _setT('printDenier',     data.denier      || '—');
-  _setT('printAnyam',      data.anyam       || '—');
-  _setT('printBerat',      data.berat       || '—');
-  _setT('printMesin',      data.mesin       || '—');
-  _setT('printKeterangan', data.keterangan  || '—');
-  _setT('printTrace',      data.kode_trace  || '—');
-  _setT('printRegister',   data.register    || '—');
-  _setT('printBarcode',    data.barcode     || '—');
+  const barcodeVal = data.barcode || data.register || '';
+  const SEP_D = '='.repeat(42);
+  const SEP_S = '-'.repeat(42);
 
-  /* Timestamp cetak */
-  const now = new Date();
-  const ts  = now.toLocaleString('id-ID', {
-    day:'2-digit', month:'2-digit', year:'numeric',
-    hour:'2-digit', minute:'2-digit', second:'2-digit'
-  });
-  _setT('printTimestamp', 'Cetak: ' + ts);
+  /* ── Isi field label ── */
+  const tglJam = document.getElementById('l-tgl-jam');
+  if (tglJam) {
+    tglJam.textContent = `TGL : ${data.tanggal || '—'}\nJAM : ${data.jam || '—'}`;
+    tglJam.style.whiteSpace = 'pre';
+  }
 
-  /* Info chips */
-  _setT('chipRegister', data.register  || '—');
-  _setT('chipMesin',    data.mesin     || '—');
-  _setT('chipGroup',    data.group     || '—');
-  _setT('chipRoll',     data.roll_ke   || '—');
-  _setT('chipPic',      data.pic       || '—');
+  const grpPic = document.getElementById('l-grp-pic');
+  if (grpPic) {
+    grpPic.textContent = `GROUP : ${data.group || '—'}\nPIC   : ${data.pic || '—'}`;
+    grpPic.style.whiteSpace = 'pre';
+  }
 
-  /* Buka modal */
+  _setT('l-nama',      `NAMA   : ${data.nama || '—'}`);
+
+  const rollReg = document.getElementById('l-roll-reg');
+  if (rollReg) {
+    rollReg.innerHTML = `<span>Roll Ke : ${data.roll_ke || '—'}</span><span><b>REGISTER : ${data.register || '—'}</b></span>`;
+  }
+
+  _setT('sep1', SEP_D);
+  _setT('sep2', SEP_S);
+  _setT('sep3', SEP_S);
+  _setT('sep4', SEP_D);
+
+  const tblData = document.getElementById('l-tbldata');
+  if (tblData) {
+    tblData.innerHTML =
+      `<span class="col-pj">${data.panjang || '—'}</span>` +
+      `<span class="col-lb">${data.lebar   || '—'}</span>` +
+      `<span class="col-dn">${data.denier  || '—'}</span>` +
+      `<span class="col-gsm">${data.anyam  || '—'}</span>`;
+  }
+
+  _setT('l-berat',      `Berat  : ${data.berat      || '—'}`);
+  _setT('l-mesin',      `Mesin  : ${data.mesin      || '—'}`);
+  _setT('l-ket',        `Ket.   : ${data.keterangan || '—'}`);
+  _setT('l-trace',      `KODE TRACE : ${data.kode_trace || '—'}`);
+  _setT('l-barcodenum', `BARCODE    : ${barcodeVal}`);
+  _setT('bc-label',     barcodeVal);
+
+  /* ── Info chips ── */
+  _setT('chipRegister', data.register || '—');
+  _setT('chipMesin',    data.mesin    || '—');
+  _setT('chipGroup',    data.group    || '—');
+  _setT('chipRoll',     data.roll_ke  || '—');
+  _setT('chipPic',      data.pic      || '—');
+
+  /* ── Buka modal dulu ── */
   const backdrop = document.getElementById('printModalBackdrop');
   if (backdrop) {
     backdrop.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
+
+  /* ── Gambar barcode setelah modal visible ── */
+  setTimeout(() => {
+    const canvas = document.getElementById('barcode1d');
+    if (canvas && barcodeVal) _drawBarcode128(canvas, barcodeVal);
+  }, 80);
 }
 
 /* ──────────────────────────────────────────────────────
@@ -159,33 +183,28 @@ export function setupPrintModal() {
 ══════════════════════════════════════════════════════ */
 
 /**
- * handlePrint()
- * Tambahkan class .printing ke body sehingga @media print
- * CSS akan menyembunyikan semua kecuali thermal label.
+ * handlePrint() — Print label 9cm × 8cm
  */
 export function handlePrint() {
   console.log('🖨️ [PrintModal] handlePrint() dipanggil');
-  const thermal = document.getElementById('thermalPrint');
-  if (!thermal) {
-    console.error('❌ [PrintModal] #thermalPrint tidak ditemukan');
+  const label = document.getElementById('label-preview');
+  if (!label) {
+    console.error('❌ [PrintModal] #label-preview tidak ditemukan');
+    _showToast('⚠️', 'Label preview tidak ditemukan');
     return;
   }
 
-  console.log('📐 [PrintModal] Ukuran thermal:', thermal.offsetWidth, '×', thermal.offsetHeight, 'px');
-
-  const originalTransform = thermal.style.transform;
-  thermal.style.transform = 'none';
-  console.log('🔄 [PrintModal] Transform di-reset sementara untuk print');
+  /* Reset transform sementara agar browser print di ukuran asli */
+  const origTransform = label.style.transform;
+  label.style.transform = 'none';
 
   _showToast('🖨️', 'Membuka dialog print...');
 
   setTimeout(() => {
-    console.log('🖨️ [PrintModal] Memanggil window.print()...');
     window.print();
     setTimeout(() => {
-      thermal.style.transform = originalTransform;
-      console.log('✅ [PrintModal] Transform dikembalikan setelah print');
-    }, 500);
+      label.style.transform = origTransform;
+    }, 600);
   }, 300);
 }
 
@@ -199,101 +218,80 @@ function _doPrint() {
 ══════════════════════════════════════════════════════ */
 
 /**
- * downloadThermalPdf(data)
- * @param {object} data - opsional, untuk nama file
+ * downloadThermalPdf() — Capture #label-preview → PDF 9cm × 8cm
  */
 export async function downloadThermalPdf(data = {}) {
   console.log('📄 [PrintModal] downloadThermalPdf() dipanggil');
-  const btn     = document.getElementById('pmBtnPdf');
-  const thermal = document.getElementById('thermalPrint');
+  const btn   = document.getElementById('pmBtnPdf');
+  const label = document.getElementById('label-preview');
 
-  if (!thermal) {
-    console.error('❌ [PrintModal] #thermalPrint tidak ditemukan');
-    _showToast('⚠️', '#thermalPrint tidak ditemukan');
+  if (!label) {
+    _showToast('⚠️', '#label-preview tidak ditemukan');
     return;
   }
 
-  /* ── Cek ketersediaan library ── */
-  console.log('🔍 [PrintModal] Cek library:');
-  console.log('  html2canvas:', typeof html2canvas !== 'undefined' ? '✅ tersedia' : '❌ TIDAK ADA');
-  console.log('  jsPDF:', typeof window.jspdf !== 'undefined' ? '✅ tersedia' : '❌ TIDAK ADA');
-
   if (typeof html2canvas === 'undefined') {
-    _showToast('⚠️', 'html2canvas belum dimuat. Cek koneksi internet.');
+    _showToast('⚠️', 'html2canvas belum dimuat');
     return;
   }
   if (typeof window.jspdf === 'undefined') {
-    _showToast('⚠️', 'jsPDF belum dimuat. Cek koneksi internet.');
+    _showToast('⚠️', 'jsPDF belum dimuat');
     return;
   }
 
-  /* ── Loading state ON ── */
   _setLoadingState(btn, true, 'Generating PDF...');
 
   try {
-    /* ── Sementara reset transform agar capture full size ── */
-    const originalTransform    = thermal.style.transform;
-    const originalBoxShadow    = thermal.style.boxShadow;
-    const originalBorderRadius = thermal.style.borderRadius;
-    const originalBorder       = thermal.style.border;
+    /* ── Reset transform agar capture ukuran asli 9cm × 8cm ── */
+    const origTransform  = label.style.transform;
+    const origBoxShadow  = label.style.boxShadow;
+    const origBorder     = label.style.border;
 
-    thermal.style.transform    = 'none';
-    thermal.style.boxShadow    = 'none';
-    console.log('📐 [PrintModal] Ukuran thermal saat capture:', thermal.offsetWidth, '×', thermal.offsetHeight);
+    label.style.transform = 'none';
+    label.style.boxShadow = 'none';
+    label.style.border    = 'none';
 
-    thermal.style.transform    = 'none';
-    thermal.style.boxShadow    = 'none';
-    thermal.style.borderRadius = '0';
-    thermal.style.border       = 'none';
+    console.log('📐 [PrintModal] Capture ukuran:', label.offsetWidth, '×', label.offsetHeight, 'px');
 
-    /* ── Capture dengan html2canvas ── */
-    console.log('📸 [PrintModal] Memulai html2canvas capture (scale=4)...');
-    const canvas = await html2canvas(thermal, {
-      scale:            4,         // 4× untuk high quality, tidak blur
-      useCORS:          true,
-      allowTaint:       false,
-      backgroundColor:  '#ffffff',
-      logging:          false,
-      width:            thermal.offsetWidth,
-      height:           thermal.offsetHeight,
-      windowWidth:      thermal.offsetWidth,
-      windowHeight:     thermal.offsetHeight,
+    /* ── Capture ── */
+    const capturedCanvas = await html2canvas(label, {
+      scale: 4,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      logging: false,
+      width: label.offsetWidth,
+      height: label.offsetHeight,
     });
 
-    console.log('✅ [PrintModal] html2canvas selesai — canvas:', canvas.width, '×', canvas.height, 'px');
+    /* ── Kembalikan style ── */
+    label.style.transform = origTransform;
+    label.style.boxShadow = origBoxShadow;
+    label.style.border    = origBorder;
 
-    /* ── Kembalikan style asli ── */
-    thermal.style.transform    = originalTransform;
-    thermal.style.boxShadow    = originalBoxShadow;
-    thermal.style.borderRadius = originalBorderRadius;
-    thermal.style.border       = originalBorder;
+    console.log('✅ html2canvas selesai —', capturedCanvas.width, '×', capturedCanvas.height, 'px');
 
-    /* ── Buat PDF ukuran 9cm × 8cm ── */
+    /* ── Buat PDF ── */
     const { jsPDF } = window.jspdf;
-    const PDF_W_CM = 9;  // lebar  dalam cm
-    const PDF_H_CM = 8;  // tinggi dalam cm
+    const PDF_W = 9;   // cm
+    const PDF_H = 8;   // cm
 
     const pdf = new jsPDF({
-      orientation: 'landscape',  // 9cm > 8cm
-      unit:        'cm',
-      format:      [PDF_W_CM, PDF_H_CM],
+      orientation: 'landscape',
+      unit: 'cm',
+      format: [PDF_W, PDF_H],
     });
 
-    const imgData   = canvas.toDataURL('image/png');
-    const imgWidth  = PDF_W_CM;
-    const imgHeight = PDF_H_CM;
+    const imgData = capturedCanvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 0, 0, PDF_W, PDF_H, '', 'FAST');
 
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, '', 'FAST');
+    /* ── Nama file ── */
+    const merged   = { ..._printData, ...data };
+    const tgl      = (merged.tanggal || new Date().toISOString().split('T')[0]).replace(/\//g, '-');
+    const roll     = merged.roll_ke || merged.roll || 'X';
+    const fileName = `form-roll-${tgl}-roll${roll}.pdf`;
 
-    /* ── Nama file: form-roll-[tanggal]-[roll].pdf ── */
-    const mergedData  = { ..._printData, ...data };
-    const tgl         = (mergedData.tanggal || new Date().toISOString().split('T')[0]).replace(/\//g, '-');
-    const roll        = mergedData.roll_ke || mergedData.roll || 'X';
-    const fileName    = `form-roll-${tgl}-${roll}.pdf`;
-
-    console.log(`📁 [PrintModal] Menyimpan PDF: ${fileName}`);
     pdf.save(fileName);
-
     _showToast('✅', `PDF disimpan: ${fileName}`);
     console.log('✅ [PrintModal] PDF berhasil diunduh:', fileName);
 
@@ -301,7 +299,6 @@ export async function downloadThermalPdf(data = {}) {
     console.error('❌ [PrintModal] Gagal generate PDF:', err);
     _showToast('❌', 'Gagal membuat PDF: ' + (err.message || 'unknown error'));
   } finally {
-    /* ── Loading state OFF ── */
     _setLoadingState(btn, false, 'Download PDF');
   }
 }
@@ -318,7 +315,7 @@ function _doCopyTrace() {
     return;
   }
 
-  const btn  = document.getElementById('pmBtnCopy');
+  const btn = document.getElementById('pmBtnCopy');
   const done = () => {
     console.log('✅ [PrintModal] Trace code berhasil disalin:', _traceCode);
     if (btn) {
@@ -348,7 +345,7 @@ function _fallbackCopy(text, cb) {
   });
   document.body.appendChild(ta);
   ta.select();
-  try { document.execCommand('copy'); cb(); } catch(e) { _showToast('⚠️', 'Gagal menyalin.'); }
+  try { document.execCommand('copy'); cb(); } catch (e) { _showToast('⚠️', 'Gagal menyalin.'); }
   document.body.removeChild(ta);
 }
 
@@ -359,6 +356,31 @@ function _setT(id, val) {
 }
 
 /* ──────────────────────────────────────────────────────
+   _drawBarcode128(canvas, text)
+   — Menggambar barcode 1D menggunakan library JsBarcode
+─────────────────────────────────────────────────────── */
+function _drawBarcode128(canvas, text) {
+  if (typeof JsBarcode === 'undefined') {
+    console.warn('⚠️ JsBarcode belum dimuat!');
+    return;
+  }
+  
+  // Menggunakan JsBarcode untuk hasil scan yang presisi dan tidak blur
+  JsBarcode(canvas, text, {
+    format: "CODE128",
+    width: 1.4,        // Ketebalan baris (disesuaikan agar proporsional)
+    height: 25,        // Tinggi barcode
+    displayValue: false, // Jangan tampilkan teks di dalam barcode (sudah ada label terpisah)
+    margin: 0,
+    background: "#ffffff",
+    lineColor: "#000000"
+  });
+}
+
+
+
+
+/* ──────────────────────────────────────────────────────
    _setLoadingState(btn, isLoading, text)
    — Toggle disabled/teks tombol saat proses PDF
 ─────────────────────────────────────────────────────── */
@@ -367,11 +389,11 @@ function _setLoadingState(btn, isLoading, text) {
   btn.disabled = isLoading;
   btn.textContent = text;
   btn.style.opacity = isLoading ? '0.65' : '';
-  btn.style.cursor  = isLoading ? 'not-allowed' : '';
+  btn.style.cursor = isLoading ? 'not-allowed' : '';
 }
 
 function _showToast(icon, msg) {
-  const el  = document.getElementById('pmToast');
+  const el = document.getElementById('pmToast');
   const ico = document.getElementById('pmToastIco');
   const txt = document.getElementById('pmToastTxt');
   if (!el) return;

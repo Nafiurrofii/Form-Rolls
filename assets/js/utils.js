@@ -136,7 +136,42 @@ export function clearMultipleValues(ids) {
  * @param {string} type - 'success', 'error', 'warning', 'info'
  */
 export function showNotification(message, type = 'success') {
-  // Pesan hanya akan muncul di console log untuk debugging
+  const toast = document.getElementById('pmToast');
+  const toastTxt = document.getElementById('pmToastTxt');
+  const toastIco = document.getElementById('pmToastIco');
+
+  if (toast && toastTxt) {
+    toastTxt.innerText = message;
+    
+    // Set icon & color based on type
+    if (toastIco) {
+      if (type === 'success') {
+        toastIco.innerText = '✓';
+        toast.style.borderLeft = '4px solid #16a34a';
+      } else if (type === 'error') {
+        toastIco.innerText = '✕';
+        toast.style.borderLeft = '4px solid #dc2626';
+      } else if (type === 'warning') {
+        toastIco.innerText = '⚠';
+        toast.style.borderLeft = '4px solid #ea6c00';
+      } else {
+        toastIco.innerText = 'ℹ';
+        toast.style.borderLeft = '4px solid #2563eb';
+      }
+    }
+
+    toast.classList.add('show');
+    
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  // Tambahkan browser alert agar lebih terlihat (Permintaan User)
+  alert(message);
+
+  // Tetap log ke console untuk debugging
   console.log(`[${type.toUpperCase()}] ${message}`);
 }
 

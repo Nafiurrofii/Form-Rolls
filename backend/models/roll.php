@@ -11,7 +11,7 @@ class Roll {
     /**
      * GET ALL DATA
      */
-    public function getAll() {
+    public function getAll($startDate = null, $endDate = null) {
         $sql = "SELECT 
                     id,
                     tanggal AS tgl,
@@ -30,10 +30,19 @@ class Roll {
                     barcode,
                     keterangan,
                     pic AS user
-                FROM rolls
-                ORDER BY id DESC";
+                FROM rolls";
+                
+        $params = [];
+        if ($startDate && $endDate) {
+            $sql .= " WHERE tanggal BETWEEN :start AND :end";
+            $params[':start'] = $startDate;
+            $params[':end'] = $endDate;
+        }
 
-        $stmt = $this->pdo->query($sql);
+        $sql .= " ORDER BY id DESC";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
         return $stmt->fetchAll();
     }
 

@@ -79,11 +79,13 @@ function renderTableData(data, perPage) {
 
 /**
  * ✨ REFRESH DATA - Reload dari API
+ * @param {string} startDate - (Optional)
+ * @param {string} endDate - (Optional)
  */
-async function refreshTableData() {
+async function refreshTableData(startDate = null, endDate = null) {
   try {
     console.log('🔄 Refreshing data...');
-    const data = await fetchRolls();
+    const data = await fetchRolls(startDate, endDate);
     setFilteredData(data);
     setCurrentPage(1);
     

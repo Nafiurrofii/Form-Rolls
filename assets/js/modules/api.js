@@ -14,11 +14,18 @@ const API_BASE_URL = getAPIBaseUrl();
 
 /**
  * Fetch semua rolls dari API
+ * @param {string} startDate - Format YYYY-MM-DD (opsional)
+ * @param {string} endDate - Format YYYY-MM-DD (opsional)
  * @returns {Promise<Array>}
  */
-export async function fetchRolls() {
+export async function fetchRolls(startDate = null, endDate = null) {
   try {
-    const response = await fetch(`${API_BASE_URL}?action=get`);
+    let url = `${API_BASE_URL}?action=get`;
+    if (startDate && endDate) {
+      url += `&start=${startDate}&end=${endDate}`;
+    }
+    
+    const response = await fetch(url);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

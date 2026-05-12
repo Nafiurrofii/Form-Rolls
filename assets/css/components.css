@@ -1,74 +1,96 @@
-/* ─────────────────────────────────────────────────────
-   COMPONENTS - Button, Input, Select, Form Elements
-   ──────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   COMPONENTS — Input, Button, Form Elements, Pagination
+   Form Roll | Industrial ERP Dashboard
+   ═══════════════════════════════════════════════════════ */
 
-/* ─── INPUT FIELDS ────────────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   BASE INPUT RESET + DEFAULTS
+   ════════════════════════════════════════════════════════ */
 input[type="text"],
 input[type="date"],
 input[type="time"],
 input[type="number"],
 select {
   width: 100%;
-  height: 44px; /* Blue Modern Style */
-  border: 1px solid #bfdbfe;
-  border-radius: 12px;
-  padding: 0 16px;
-  font-size: 14px;
+  height: var(--h-input);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 0 9px;
+  font-size: 12px;
   font-family: var(--font-main);
-  color: #0f172a;
-  background: var(--white);
+  color: var(--gray-900);
+  background: var(--surface-input);
+  transition: border-color var(--transition), box-shadow var(--transition);
   outline: none;
-  transition: all 0.3s ease;
   appearance: none;
   -webkit-appearance: none;
 }
 
-input:focus,
-select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+/* INPUT AKTIF */
+input:not([readonly]):not([disabled]),
+select:not([disabled]) {
+  border: 1.5px solid var(--blue-mid) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07) !important;
 }
 
-.readonly-field {
-  background-color: #eff6ff !important;
-  color: #64748b !important;
-  border-color: #bfdbfe !important;
+input:not([readonly]):not([disabled]):focus,
+select:not([disabled]):focus {
+  border-color: var(--blue-400) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14) !important;
+}
+
+/* INPUT TERKUNCI */
+input[readonly],
+input[disabled],
+select[disabled] {
+  background: var(--gray-50) !important;
+  color: var(--gray-800) !important;
+  border: 1px solid var(--border-soft) !important;
+  box-shadow: none !important;
   cursor: not-allowed;
   opacity: 0.8;
 }
 
-select:disabled {
-  background-color: #eff6ff !important;
-  color: #64748b !important;
-  border-color: #bfdbfe !important;
-  cursor: not-allowed;
+/* Khusus: hidden input jangan terlihat */
+input[type="hidden"] {
+  display: none !important;
 }
 
+/* ─── SELECT arrow ──────────────────────────────────── */
 select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 30px;
+  background-position: right 9px center;
+  padding-right: 28px;
 }
 
-/* ─── FIELD ROW ───────────────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   FIELD ROW — Layout baris label + input
+   ════════════════════════════════════════════════════════ */
 .field-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-height: var(--h-input);
 }
 
 .field-row label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gray-dark);
-  min-width: 80px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-600);
+  width: 82px;
   flex-shrink: 0;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
 }
 
 .field-row .input-wrap {
   flex: 1;
   position: relative;
+  min-width: 0;
 }
 
 .edit-wrap {
@@ -80,214 +102,179 @@ select {
   flex: 1;
 }
 
-/* ─── SMALL BUTTON ───────────────────────────────── */
-.btn-sm {
-  height: 36px;
-  padding: 0 14px;
-  border: 1.5px solid var(--blue-mid);
-  border-radius: var(--radius);
-  background: var(--white);
-  color: var(--blue-mid);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background .15s, color .15s;
-}
-
-.btn-sm:hover {
-  background: var(--blue-mid);
-  color: #fff;
-}
-
-/* ─── PRIMARY BUTTONS ─────────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   ACTION BUTTONS — Main toolbar
+   ════════════════════════════════════════════════════════ */
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  height: 40px;
-  padding: 0 22px;
-  border-radius: var(--radius);
-  font-size: 13.5px;
-  font-weight: 600;
+  justify-content: center;
+  gap: 6px;
+  height: var(--h-btn);
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
   cursor: pointer;
-  border: none;
-  transition: opacity .15s, transform .1s;
-  letter-spacing: .3px;
+  border: 1.5px solid transparent;
+  transition: all var(--transition);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0);
+  transition: background var(--transition);
+}
+
+.btn:hover::after {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btn:active {
-  transform: scale(.97);
+  transform: scale(0.97);
 }
 
 .btn svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
-.btn-primary  { background: var(--blue-mid);   color: #fff; }
-.btn-primary.active { 
-  background: linear-gradient(135deg, #059669, #10b981); 
-  box-shadow: 0 4px 12px rgba(16,185,129,0.35);
-  border: 1px solid rgba(255,255,255,0.3);
+/* ─── BARU (Primary/Blue) ──────────────────────────── */
+.btn-primary {
+  background: var(--blue-mid);
+  color: #fff;
+  border-color: var(--blue-mid);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
-.btn-primary.active::after {
-  content: ' MODE BARU';
-  font-size: 10px;
-  font-weight: 800;
+
+.btn-primary:hover {
+  background: var(--blue-main);
+  border-color: var(--blue-main);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Active state = mode BARU aktif */
+.btn-primary.active {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border-color: #059669;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.30);
+}
+
+.btn-primary.active::before {
+  content: '● ';
+  font-size: 8px;
   opacity: 0.8;
 }
-.btn-success  { background: var(--green-main); color: #fff; }
-.btn-warning  { background: var(--white); color: var(--yellow-main); border: 1.5px solid var(--yellow-main); }
-.btn-danger   { background: var(--white); color: var(--red-main);    border: 1.5px solid var(--red-main); }
-.btn-neutral  { background: var(--white); color: var(--gray-mid);    border: 1.5px solid var(--gray-border); }
 
-.btn:hover {
-  opacity: .88;
-}
-
-/* ─── TOOL BUTTONS ───────────────────────────────── */
-.btn-tool {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 42px;
-  border-radius: var(--radius);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 2px solid;
-  background: var(--white);
-  transition: background .15s, color .15s;
-}
-
-.btn-tool.lihat {
-  color: var(--blue-mid);
-  border-color: var(--blue-mid);
-}
-
-.btn-tool.excel {
-  color: var(--green-main);
-  border-color: var(--green-main);
-}
-
-.btn-tool.lihat:hover {
-  background: var(--blue-mid);
-  color: #fff;
-}
-
-.btn-tool.excel:hover {
+/* ─── SIMPAN (Success/Green) ───────────────────────── */
+.btn-success {
   background: var(--green-main);
   color: #fff;
+  border-color: var(--green-main);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
 }
 
-/* ─── FILTER BUTTON ───────────────────────────────– */
-.btn-filter {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 14px;
-  border: 1.5px solid var(--blue-mid);
-  border-radius: var(--radius);
+.btn-success:hover {
+  background: var(--green-dark);
+  border-color: var(--green-dark);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ─── EDIT (Warning/Orange) ────────────────────────── */
+.btn-warning {
   background: var(--white);
-  color: var(--blue-mid);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .15s, color .15s;
+  color: var(--orange-main);
+  border-color: var(--orange-main);
 }
 
-.btn-filter:hover {
-  background: var(--blue-mid);
+.btn-warning:hover {
+  background: var(--orange-main);
   color: #fff;
+  box-shadow: 0 3px 10px rgba(234, 108, 0, 0.25);
+  transform: translateY(-1px);
 }
 
-/* ─── BADGE ───────────────────────────────────────– */
-.badge-shift {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  background: var(--blue-light);
-  color: var(--blue-main);
-  font-weight: 600;
-  font-size: 11px;
-}
-
-/* ─── PAGINATION ───────────────────────────────── */
-.page-btn {
-  min-width: 32px;
-  height: 32px;
-  padding: 0 8px;
-  border: 1.5px solid var(--gray-border);
-  border-radius: var(--radius);
+/* ─── HAPUS (Danger/Red) ───────────────────────────── */
+.btn-danger {
   background: var(--white);
-  color: var(--gray-dark);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background .15s, border-color .15s, color .15s;
+  color: var(--red-main);
+  border-color: var(--red-main);
 }
 
-.page-btn:hover {
-  border-color: var(--blue-mid);
-  color: var(--blue-mid);
-}
-
-.page-btn.active {
-  background: var(--blue-mid);
-  border-color: var(--blue-mid);
+.btn-danger:hover {
+  background: var(--red-main);
   color: #fff;
+  box-shadow: 0 3px 10px rgba(220, 38, 38, 0.25);
+  transform: translateY(-1px);
 }
 
-.page-btn:disabled {
-  opacity: .4;
-  cursor: default;
+/* ─── KELUAR (Neutral/Gray) ────────────────────────── */
+.btn-neutral {
+  background: var(--white);
+  color: var(--gray-500);
+  border-color: var(--gray-300);
 }
 
-.page-dots {
-  color: var(--gray-mid);
-  font-size: 13px;
-  padding: 0 4px;
+.btn-neutral:hover {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border-color: var(--gray-400);
 }
 
-/* =========================
-   BUTTON LANJUT MODERN
-========================= */
+/* ════════════════════════════════════════════════════════
+   BUTTON LANJUT — Gradient Blue, di action bar
+   ════════════════════════════════════════════════════════ */
 .btn-lanjut {
   position: relative;
-  padding: 0 24px;
-  height: 36px; /* Disesuaikan dengan tinggi input */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 16px;
+  height: var(--h-btn);
   border: none;
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
   cursor: pointer;
   overflow: hidden;
-  transition: all 0.35s ease;
-  box-shadow:
-    0 4px 10px rgba(37,99,235,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+}
+
+.btn-lanjut svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
 .btn-lanjut:hover {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow:
-    0 6px 15px rgba(37,99,235,0.45),
-    inset 0 1px 0 rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(37, 99, 235, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .btn-lanjut:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
-/* efek shine */
+/* Shine effect */
 .btn-lanjut::before {
   content: '';
   position: absolute;
@@ -295,37 +282,33 @@ select {
   left: -120%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255,255,255,0.35),
-    transparent
-  );
-  transition: 0.7s;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: 0.6s;
 }
 
 .btn-lanjut:hover::before {
   left: 120%;
 }
 
-/* ACTIVE STATE */
+/* Active = mode lanjut aktif */
 .btn-lanjut.active {
-  background: linear-gradient(135deg, #0f766e, #14b8a6);
-  box-shadow:
-    0 6px 15px rgba(20,184,166,0.4),
-    0 0 10px rgba(20,184,166,0.35);
-  padding-left: 32px;
-  padding-right: 16px;
+  background: linear-gradient(135deg, #0f766e, #0d9488);
+  box-shadow: 0 5px 14px rgba(13, 148, 136, 0.38),
+    0 0 0 2px rgba(13, 148, 136, 0.20);
 }
 
 .btn-lanjut.active::after {
   content: '✓';
   position: absolute;
-  left: 12px;
+  left: 9px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 14px;
+  font-size: 12px;
   animation: checkPop 0.3s ease;
+}
+
+.btn-lanjut.active {
+  padding-left: 26px;
 }
 
 @keyframes checkPop {
@@ -333,8 +316,130 @@ select {
     opacity: 0;
     transform: translateY(-50%) scale(0);
   }
+
   to {
     opacity: 1;
     transform: translateY(-50%) scale(1);
   }
+}
+
+/* ════════════════════════════════════════════════════════
+   SMALL BUTTON
+   ════════════════════════════════════════════════════════ */
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: var(--h-btn-sm);
+  padding: 0 12px;
+  border: 1.5px solid var(--blue-mid);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--blue-mid);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+
+.btn-sm:hover {
+  background: var(--blue-mid);
+  color: #fff;
+}
+
+/* ════════════════════════════════════════════════════════
+   FILTER BUTTON — Tabel search area
+   ════════════════════════════════════════════════════════ */
+.btn-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: var(--h-btn-sm);
+  padding: 0 12px;
+  border: 1.5px solid var(--blue-mid);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--blue-mid);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.btn-filter svg {
+  width: 12px;
+  height: 12px;
+}
+
+.btn-filter:hover {
+  background: var(--blue-mid);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.2);
+}
+
+/* ════════════════════════════════════════════════════════
+   BADGE
+   ════════════════════════════════════════════════════════ */
+.badge-shift {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: var(--blue-light);
+  color: var(--blue-main);
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.3px;
+}
+
+/* ════════════════════════════════════════════════════════
+   PAGINATION
+   ════════════════════════════════════════════════════════ */
+.page-btn {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray-600);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  font-family: var(--font-mono);
+}
+
+.page-btn:hover {
+  border-color: var(--blue-mid);
+  color: var(--blue-mid);
+  background: var(--blue-50);
+}
+
+.page-btn.active {
+  background: var(--blue-mid);
+  border-color: var(--blue-mid);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+.page-dots {
+  color: var(--gray-400);
+  font-size: 11px;
+  padding: 0 2px;
+  font-family: var(--font-mono);
 }

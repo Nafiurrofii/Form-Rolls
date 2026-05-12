@@ -49,10 +49,26 @@ export function attachButtonHandlers() {
     btnFormEdit.addEventListener('click', handleLanjut);
   }
 
-  // LIHAT button
-  const btnLihat = document.querySelector('.btn-tool.lihat');
-  if (btnLihat) {
-    btnLihat.addEventListener('click', handleLihat);
+  // RESET FILTER button
+  const btnResetFilter = document.querySelector('.btn-tool.reset-filter');
+  if (btnResetFilter) {
+    btnResetFilter.addEventListener('click', handleResetFilter);
+  }
+
+  // Auto-filter saat tanggal dipilih
+  const periodeAwal = document.getElementById('periode_awal');
+  const periodeAkhir = document.getElementById('periode_akhir');
+  if (periodeAwal && periodeAkhir) {
+    const applyFilter = () => {
+      if (periodeAwal.value && periodeAkhir.value) {
+        if (window.formRollApp && typeof window.formRollApp.refreshTableData === 'function') {
+          // showNotification('Menerapkan filter periode...', 'info');
+          window.formRollApp.refreshTableData(periodeAwal.value, periodeAkhir.value);
+        }
+      }
+    };
+    periodeAwal.addEventListener('change', applyFilter);
+    periodeAkhir.addEventListener('change', applyFilter);
   }
 
   // EXCEL button
@@ -75,13 +91,13 @@ function handleBaru() {
   if (wasActive) {
     // Jika sudah aktif, klik lagi untuk mematikan mode BARU (Kembali ke Normal)
     resetForm();
-    showNotification('Mode Baru dibatalkan', 'info');
+    // showNotification('Mode Baru dibatalkan', 'info');
   } else {
     // Jika belum aktif, aktifkan mode BARU
     resetForm(); 
     btnBaru.classList.add('active');
     toggleFormInputs(true, 'full'); // Buka kunci input penuh untuk data baru
-    showNotification('Silakan input data baru', 'info');
+    // showNotification('Silakan input data baru', 'info');
   }
 }
 
@@ -105,7 +121,7 @@ async function handleSimpan() {
        return;
     }
 
-    showNotification('Sedang menyimpan ke database...', 'info');
+    // showNotification('Sedang menyimpan ke database...', 'info');
     console.log('⏳ Memanggil saveRoll() untuk simpan ke API/DATABASE');
     const result = await saveRoll(formData, rollId);
     
@@ -113,7 +129,7 @@ async function handleSimpan() {
     if (result.status === 'success') {
       console.log('✅ BERHASIL MENYIMPAN KE DATABASE! ID:', result.data?.id);
       const successMsg = '✅ Data berhasil ' + (editing ? 'diperbarui' : 'disimpan') + ' ke DATABASE!';
-      showNotification(successMsg, 'success');
+      // showNotification(successMsg, 'success');
 
       // Refresh tabel data
       if (window.formRollApp && typeof window.formRollApp.refreshTableData === 'function') {
@@ -177,7 +193,7 @@ function handleLanjut() {
     setMultipleValues({ 'roll_ke': nextRoll });
     updateTraceCode();
     
-    showNotification('Mode Lanjut: Roll +1', 'info');
+    // showNotification('Mode Lanjut: Roll +1', 'info');
   } else {
     // Mode OFF: Kembalikan form ke status terkunci (disable)
     setEditMode(true); 
@@ -186,7 +202,7 @@ function handleLanjut() {
     // Reset form ke data asli baris yang dipilih
     setFormData(selected);
     
-    showNotification('Mode Lanjut: Dimatikan (Form Terkunci)', 'info');
+    // showNotification('Mode Lanjut: Dimatikan (Form Terkunci)', 'info');
   }
 }
 
@@ -214,14 +230,85 @@ function handleKeluar() {
   }
 }
 
-function handleLihat() {
-  showNotification('Menampilkan data periode terpilih.', 'info');
-  // Implementasi: Filter berdasarkan periode
+function handleResetFilter() {
+  const startInput = document.getElementById('periode_awal');
+  const endInput = document.getElementById('periode_akhir');
+  
+  let hasFilter = false;
+  if (startInput && startInput.value) { startInput.value = ''; hasFilter = true; }
+  if (endInput && endInput.value) { endInput.value = ''; hasFilter = true; }
+  
+  if (window.formRollApp && typeof window.formRollApp.refreshTableData === 'function') {
+    if (hasFilter) {
+      showNotification('Filter di-reset. Menampilkan semua data.', 'info');
+    }
+    window.formRollApp.refreshTableData();
+  } else {
+    showNotification('Aplikasi belum siap. Silakan refresh halaman.', 'error');
+  }
 }
 
 function handleExcel() {
-  showNotification('Mengekspor ke Excel...', 'info');
-  // Implementasi: Buat export ke Excel
+  const startInput = document.getElementById('periode_awal');
+  const endInput = document.getElementById('periode_akhir');
+  
+  // Mengambil data yang saat ini aktif di tabel (setelah filter/pencarian dll)
+  const appState = window.formRollApp;
+  if (!appState || !appState.getFilteredData) return;
+  
+  const data = appState.getFilteredData();
+  if (!data || data.length === 0) {
+    showNotification('Tidak ada data untuk diekspor', 'warning');
+    return;
+  }
+  
+  showNotification('Mengekspor ke Excel (XLSX)...', 'info');
+  
+  // Header Excel (Kolom Tabel)
+  const headers = ['NO', 'TANGGAL', 'JAM', 'ROLL', 'SHIFT', 'MESIN', 'NAMA', 'DENIER', 'PANJANG', 'LEBAR', 'ANYAM', 'BERAT', 'TRACE CODE', 'REGISTER', 'KETERANGAN', 'PIC'];
+  
+  // Map data ke bentuk array untuk Excel
+  const rows = data.map((item, index) => [
+    index + 1,
+    item.tgl, 
+    item.jam, 
+    item.roll, 
+    item.shift, 
+    item.mesin, 
+    item.nama, 
+    item.dnr, 
+    item.pj, 
+    item.lb, 
+    item.anyam, 
+    item.br, 
+    item.trace, 
+    item.reg, 
+    item.keterangan || '', 
+    item.user || ''
+  ]);
+  
+  // Cek apakah SheetJS tersedia
+  if (typeof XLSX === 'undefined') {
+    alert('Library Excel (SheetJS) belum dimuat. Periksa koneksi internet.');
+    return;
+  }
+
+  // Gabungkan header dan baris data
+  const worksheetData = [headers, ...rows];
+  
+  // Buat worksheet dan workbook
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data Roll");
+  
+  // Tentukan nama file
+  let fileName = 'Data_Roll_Produksi.xlsx';
+  if (startInput && endInput && startInput.value && endInput.value) {
+    fileName = `Data_Roll_${startInput.value}_sd_${endInput.value}.xlsx`;
+  }
+    
+  // Trigger download file .xlsx
+  XLSX.writeFile(workbook, fileName);
 }
 
 /**

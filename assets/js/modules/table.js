@@ -78,9 +78,16 @@ function handleRowClick(row) {
   setEditMode(true); // Status internal Edit Mode tetap aktif agar tombol SIMPAN tahu ini update
   toggleFormInputs(false); // Tapi visual form dikunci (disable) sampai klik EDIT/LANJUT
 
-  // Matikan status "active" pada tombol BARU jika ada
+  // Matikan status "active" pada tombol BARU & LANJUT
   const btnBaru = document.querySelector('.btn-primary');
   if (btnBaru) btnBaru.classList.remove('active');
+
+  const btnLanjut = document.querySelector('.btn-lanjut');
+  if (btnLanjut) btnLanjut.classList.remove('active');
+
+  // Reset teks input lanjut jika ada
+  const inputLanjut = document.getElementById('lanjut');
+  if (inputLanjut) inputLanjut.value = 'Lanjut';
 }
 
 /**

@@ -190,118 +190,83 @@
   min-height: 480px;
 }
 
-/* ─── The actual thermal div (real units) ────────────── */
-#thermalPrint {
-  width: 9cm;
-  height: 8cm;
-  overflow: hidden;
-  transform: scale(1.55);
-  transform-origin: top center;
+/* ─── Label 9cm × 8cm (340px × 302px) ────────────────── */
+#label-preview {
+  width: 340px;
+  height: 302px;
   background: #fff;
-  border: 1px solid #aaa;
-  box-shadow: 0 4px 20px rgba(0,0,0,.18), 2px 2px 0 0 rgba(0,0,0,.04);
-  border-radius: 1px;
-  display: flex;
-  flex-direction: column;
-  padding: 2.5mm 3mm;
-  font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace;
   color: #000;
-  position: relative;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.25;
+  padding: 12px 14px 8px 14px;
+  overflow: hidden;
+  transform: scale(1.2);
+  transform-origin: top center;
+  box-shadow: 0 4px 20px rgba(0,0,0,.18);
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+#label-preview * { font-weight: bold; box-sizing: border-box; }
+
+/* ─── Label internals ────────────────────────────────── */
+.lbl-header {
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 2px;
 }
 
-/* ─── Thermal internals (pt / mm units for print accuracy) */
-.th-title-block {
-  text-align: center;
-  padding-bottom: 2mm;
-  border-bottom: 1px dashed #555;
-  margin-bottom: 1.5mm;
-  flex-shrink: 0;
-}
-.th-company     { font-size: 5.5pt; letter-spacing: 1.5px; text-transform: uppercase; color: #444; margin-bottom: 0.5mm; }
-.th-main-title  { font-size: 9.5pt; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; line-height: 1; }
-.th-subtitle    { font-size: 4.5pt; color: #666; letter-spacing: 1px; text-transform: uppercase; margin-top: 0.5mm; }
-
-.th-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 2mm;
-  margin-bottom: 1mm;
-  flex-shrink: 0;
-}
-.th-row {
-  display: flex;
-  align-items: baseline;
-  padding: 0.6mm 0;
-  line-height: 1;
-  min-width: 0;
-}
-.th-row.span2 {
-  grid-column: 1 / -1;
-  padding: 0.8mm 0;
-  border-top: 0.5px dashed #bbb;
-  border-bottom: 0.5px dashed #bbb;
-  margin: 0.3mm 0;
-}
-.th-row.span2-plain { grid-column: 1 / -1; padding: 0.6mm 0; }
-
-.tk { font-size: 5.5pt; font-weight: 600; color: #555; letter-spacing: .3px; flex-shrink: 0; white-space: nowrap; }
-.ts { font-size: 5.5pt; color: #888; margin: 0 0.8mm; flex-shrink: 0; }
-.tv { font-size: 6.5pt; font-weight: 700; color: #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.tv.em { font-size: 7pt; }
-
-.th-dash  { border: none; border-top: 1px dashed #888; margin: 1mm 0; flex-shrink: 0; }
-.th-solid { border: none; border-top: 1px solid #222; margin: 1.2mm 0; flex-shrink: 0; }
-
-.th-trace-block { text-align: center; flex-shrink: 0; }
-.th-trace-label { font-size: 4.5pt; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #666; margin-bottom: 0.8mm; }
-.th-trace-code  { font-size: 6.5pt; font-weight: 700; letter-spacing: 1px; color: #000; word-break: break-all; }
-
-/* ─── Thermal barcode text block ─────────────────────── */
-.th-barcode-text {
-  flex-shrink: 0;
-  border: 1px dashed #000;
-  padding: 1mm 1.5mm;
-  margin: 0.5mm 0;
-}
-.thermal-row {
-  display: flex;
-  align-items: baseline;
-  padding: 0.5mm 0;
-  line-height: 1;
-}
-.tbr-key {
-  font-size: 5.5pt;
-  font-weight: 600;
-  color: #444;
-  letter-spacing: 0.3px;
-  min-width: 12mm;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-.tbr-sep {
-  font-size: 5.5pt;
-  color: #666;
-  margin: 0 1mm;
-  flex-shrink: 0;
-}
-.tbr-val {
-  font-size: 7pt;
-  font-weight: 700;
-  color: #000;
-  letter-spacing: 0.5px;
-}
-
-.th-footer-line {
-  margin-top: auto;
-  padding-top: 1mm;
-  border-top: 0.5px solid #ddd;
+.lbl-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
+  white-space: pre;
 }
-.th-footer-ts { font-size: 4pt; color: #aaa; }
-.th-footer-ok { font-size: 4pt; color: #555; font-weight: 600; letter-spacing: .5px; }
+.lbl-col-l { flex: 1; }
+.lbl-col-r { flex: 1; text-align: left; padding-left: 4px; }
+
+.sep-double { letter-spacing: -0.5px; font-size: 12px; color: #000; overflow: hidden; white-space: nowrap; }
+.sep-dash   { letter-spacing: -0.5px; font-size: 12px; color: #000; overflow: hidden; white-space: nowrap; }
+
+.tbl-header {
+  display: flex;
+  font-weight: bold;
+}
+.tbl-data {
+  display: flex;
+}
+
+.col-pj  { width: 32px; }
+.col-lb  { width: 40px; }
+.col-dn  { width: 75px; }
+.col-gsm { flex: 1; }
+
+.lbl-line {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ─── Barcode area ───────────────────────────────────── */
+.lbl-barcode-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  margin-top: 2px;
+}
+.lbl-barcode-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.lbl-barcode-label {
+  font-size: 10px;
+  margin-top: 1px;
+}
+#barcode1d canvas, #barcode1d { display: block; }
+#qrcode canvas  { display: block; }
+
 
 /* ═══ FOOTER ══════════════════════════════════════════ */
 .pm-footer {
@@ -387,7 +352,7 @@
 }
 .pm-toast.show { transform: translateY(0); opacity: 1; }
 
-/* ═══ @PRINT — Isolasi area thermal label ════════════ */
+/* ═══ @PRINT — Isolasi area label ═══════════════════ */
 @page { size: 9cm 8cm; margin: 0; }
 
 @media print {
@@ -396,36 +361,37 @@
     background: #fff !important;
     margin: 0 !important;
     padding: 0 !important;
-    width: 9cm !important;
-    height: 8cm !important;
+    width: 340px !important;
+    height: 302px !important;
     overflow: hidden !important;
   }
 
   /* Sembunyikan SEMUA elemen halaman */
   body > * { display: none !important; }
 
-  /* Tampilkan kembali HANYA backdrop > modal > body > card > host > thermal */
-  body > .pm-backdrop { display: block !important; }
-  .pm-backdrop > .pm-modal { display: block !important; }
-  .pm-modal > .pm-body { display: block !important; }
-  .pm-body > .pm-preview-card { display: block !important; }
-  .pm-preview-card > .pm-thermal-host { display: flex !important; }
-  .pm-thermal-host > #thermalPrint { display: flex !important; }
+  /* Tampilkan hanya jalur menuju #label-preview */
+  body > .pm-backdrop              { display: block !important; }
+  .pm-backdrop > .pm-modal        { display: block !important; }
+  .pm-modal > .pm-body            { display: block !important; }
+  .pm-body > .pm-preview-card     { display: block !important; }
+  .pm-preview-card > .pm-thermal-host { display: block !important; }
+  .pm-thermal-host > #label-preview   { display: block !important; }
 
-  /* Sembunyikan semua bagian UI modal kecuali thermal */
+  /* Sembunyikan UI modal — hanya label yang tampil */
   .pm-header, .pm-footer, .pm-chips-row,
   .pm-sec-label, .pm-preview-bar, .pm-toast,
   .topbar, .main { display: none !important; }
 
-  /* Hilangkan padding/margin pembungkus */
+  /* Hilangkan semua padding/margin/shadow pembungkus */
   .pm-backdrop, .pm-modal, .pm-body,
   .pm-preview-card, .pm-thermal-host {
+    all: unset !important;
+    display: block !important;
     padding: 0 !important;
     margin: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
     border: none !important;
-    border-radius: 0 !important;
     overflow: visible !important;
     width: auto !important;
     height: auto !important;
@@ -435,27 +401,29 @@
     visibility: visible !important;
     transform: none !important;
     min-height: unset !important;
-    background-image: none !important;
   }
 
-  /* Thermal print: posisi fix di pojok kiri atas, ukuran 9cm × 8cm */
-  #thermalPrint {
+  /* Label: tampil penuh 340px × 302px di pojok kiri atas */
+  #label-preview {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 9cm !important;
-    height: 8cm !important;
+    width: 340px !important;
+    height: 302px !important;
     overflow: hidden !important;
     transform: none !important;
     box-shadow: none !important;
     border: none !important;
-    border-radius: 0 !important;
-    padding: 2.5mm 3mm !important;
+    padding: 12px 14px 8px 14px !important;
     background: #fff !important;
     color: #000 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    line-height: 1.25 !important;
+    box-sizing: border-box !important;
   }
+  #label-preview * { font-weight: bold !important; box-sizing: border-box !important; }
 
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
