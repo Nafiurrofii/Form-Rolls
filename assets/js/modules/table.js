@@ -85,6 +85,9 @@ function handleRowClick(row) {
   const btnLanjut = document.querySelector('.btn-lanjut');
   if (btnLanjut) btnLanjut.classList.remove('active');
 
+  const btnEdit = document.querySelector('.btn-warning');
+  if (btnEdit) btnEdit.classList.remove('active');
+
   // Reset teks input lanjut jika ada
   const inputLanjut = document.getElementById('lanjut');
   if (inputLanjut) inputLanjut.value = 'Lanjut';

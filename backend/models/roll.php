@@ -39,7 +39,7 @@ class Roll {
             $params[':end'] = $endDate;
         }
 
-        $sql .= " ORDER BY id DESC";
+        $sql .= " ORDER BY urut DESC";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
@@ -157,6 +157,16 @@ class Roll {
             ':pic' => $data['pic']
         ]);
 
+        return true;
+    }
+
+    /**
+     * DELETE DATA
+     */
+    public function delete($id) {
+        $sql = "DELETE FROM rolls WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
         return true;
     }
 

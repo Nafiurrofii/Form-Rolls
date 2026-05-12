@@ -107,3 +107,24 @@ export async function saveRoll(data, id = null) {
     throw error;
   }
 }
+/**
+ * DELETE roll
+ */
+export async function deleteRoll(id) {
+  const endpoint = `${API_BASE_URL}?action=delete&id=${id}`;
+  
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('❌ API Error:', error);
+    throw error;
+  }
+}

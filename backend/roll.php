@@ -30,6 +30,10 @@ switch ($action) {
         updateRoll($pdo, $id);
         break;
 
+    case 'delete':
+        deleteRoll($pdo, $id);
+        break;
+
     default:
         echo json_encode([
             'status' => 'error',

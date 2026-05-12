@@ -98,3 +98,32 @@ function updateRoll($pdo, $id) {
 }
 
 
+/**
+ * DELETE
+ */
+function deleteRoll($pdo, $id) {
+    try {
+        if (!$id) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'ID is required for delete'
+            ]);
+            return;
+        }
+
+        $roll = new Roll($pdo);
+        $roll->delete($id);
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Data berhasil dihapus'
+        ]);
+    } catch (Throwable $e) {
+        error_log("DELETE ROLL ERROR: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'System error: ' . $e->getMessage()
+        ]);
+    }
+}

@@ -4,7 +4,7 @@
 
 import { showNotification, confirmAction, setMultipleValues } from '../utils.js';
 import { getFormData, setFormData, resetForm, validateForm, enableEditMode, disableEditMode, updateTraceCode, updateTimeNow, toggleFormInputs } from '../modules/form.js';
-import { saveRoll } from '../modules/api.js';
+import { saveRoll, deleteRoll } from '../modules/api.js';
 import { isEditMode, setEditMode, getSelectedRow } from '../state.js';
 import { openPrintModal } from './printModal.js';
 // NOTE: Do NOT import storage functions - we save to DATABASE via API, not localStorage!
@@ -55,6 +55,12 @@ export function attachButtonHandlers() {
     btnResetFilter.addEventListener('click', handleResetFilter);
   }
 
+  // LIHAT button
+  const btnLihat = document.querySelector('.btn-tool.lihat');
+  if (btnLihat) {
+    btnLihat.addEventListener('click', handleLihat);
+  }
+
   // Auto-filter saat tanggal dipilih
   const periodeAwal = document.getElementById('periode_awal');
   const periodeAkhir = document.getElementById('periode_akhir');
@@ -94,7 +100,7 @@ function handleBaru() {
     // showNotification('Mode Baru dibatalkan', 'info');
   } else {
     // Jika belum aktif, aktifkan mode BARU
-    resetForm(); 
+    resetForm();
     btnBaru.classList.add('active');
     toggleFormInputs(true, 'full'); // Buka kunci input penuh untuk data baru
     // showNotification('Silakan input data baru', 'info');
@@ -107,24 +113,40 @@ async function handleSimpan() {
     console.warn('⚠️ Validasi form gagal - tidak melanjutkan');
     return;
   }
-  
+
   const formData = getFormData();
-  console.log('📋 Data Form yang akan dikirim ke DATABASE:', formData);
   
+  // CEK: Apakah ada mode (BARU/EDIT/LANJUT) yang sedang aktif?
+  const anyModeActive = document.querySelector('.btn-primary.active, .btn-warning.active, .btn-lanjut.active');
+  
+  if (!anyModeActive) {
+    console.log('ℹ️ Tidak ada mode aktif (Baru/Edit/Lanjut). Hanya menampilkan modal cetak.');
+    const selected = getSelectedRow();
+    
+    openPrintModal({
+      ...formData,
+      register: selected ? (selected.reg || '—') : '—',
+      barcode: selected ? (selected.barcode || '—') : '—'
+    });
+    return;
+  }
+
+  console.log('📋 Data Form yang akan dikirim ke DATABASE:', formData);
+
   try {
     const editing = isEditMode();
     const selected = getSelectedRow();
     const rollId = (editing && selected) ? selected.id : null;
 
     if (editing && !rollId) {
-       showNotification('❌ ID Data tidak ditemukan untuk diupdate.', 'error');
-       return;
+      showNotification('❌ ID Data tidak ditemukan untuk diupdate.', 'error');
+      return;
     }
 
     // showNotification('Sedang menyimpan ke database...', 'info');
     console.log('⏳ Memanggil saveRoll() untuk simpan ke API/DATABASE');
     const result = await saveRoll(formData, rollId);
-    
+
     console.log('📤 Response dari API:', result);
     if (result.status === 'success') {
       console.log('✅ BERHASIL MENYIMPAN KE DATABASE! ID:', result.data?.id);
@@ -149,7 +171,7 @@ async function handleSimpan() {
       });
 
       // Reset form setelah modal dibuka
-      resetForm(); 
+      resetForm();
     } else {
       throw new Error('API returned non-success status: ' + result.status);
     }
@@ -165,7 +187,7 @@ function handleLanjut() {
   if (!btnLanjut) return;
 
   const selected = getSelectedRow();
-  
+
   // Jika tidak ada data yang dipilih di tabel, jangan aktifkan mode lanjut
   if (!selected) {
     showNotification('Pilih data di tabel terlebih dahulu', 'warning');
@@ -180,46 +202,99 @@ function handleLanjut() {
   if (isActive) {
     // Mode ON: Aktifkan mode edit dulu baru update nilai
     setEditMode(true);
-    
+
     // Hanya buka input tertentu untuk mode Lanjut
     toggleFormInputs(true, 'lanjut');
-    
+
     // Update jam ke waktu sekarang agar trace code real-time
     updateTimeNow();
-    
+
     // Set nilai roll_ke menjadi (nilai asli + 1)
     const nextRoll = parseInt(selected.roll || 0) + 1;
-    
+
     setMultipleValues({ 'roll_ke': nextRoll });
     updateTraceCode();
-    
+
     // showNotification('Mode Lanjut: Roll +1', 'info');
   } else {
-    // Mode OFF: Kembalikan form ke status terkunci (disable)
-    setEditMode(true); 
-    toggleFormInputs(false); 
+    // Mode OFF: Kunci kembali form
+    disableEditMode();
+    toggleFormInputs(false);
     
-    // Reset form ke data asli baris yang dipilih
-    setFormData(selected);
-    
-    // showNotification('Mode Lanjut: Dimatikan (Form Terkunci)', 'info');
+    // Reset form ke data asli baris yang dipilih jika ada
+    const selected = getSelectedRow();
+    if (selected) {
+      setFormData(selected);
+    } else {
+      resetForm();
+    }
   }
 }
 
 function handleEditAction() {
-  const formData = getFormData();
-  if (Object.values(formData).some(v => v)) {
-    enableEditMode();
-    showNotification('Edit data terpilih.', 'info');
+  const btnEdit = document.querySelector('.btn-warning');
+  if (!btnEdit) return;
+
+  const isActive = btnEdit.classList.toggle('active');
+
+  if (isActive) {
+    const selected = getSelectedRow();
+    
+    // Validasi: Harus pilih data dari tabel dulu
+    if (selected) {
+      enableEditMode();
+      
+      // Matikan mode lain agar tidak bentrok
+      document.querySelector('.btn-primary')?.classList.remove('active');
+      document.querySelector('.btn-lanjut')?.classList.remove('active');
+    } else {
+      showNotification('Pilih data di tabel terlebih dahulu', 'warning');
+      btnEdit.classList.remove('active');
+    }
   } else {
-    showNotification('Pilih atau isi data terlebih dahulu', 'warning');
+    // Mode OFF: Kunci kembali form
+    disableEditMode();
+    toggleFormInputs(false);
+    
+    // Reset form ke data asli baris yang dipilih jika ada
+    const selected = getSelectedRow();
+    if (selected) {
+      setFormData(selected);
+    } else {
+      resetForm();
+    }
   }
 }
 
-function handleHapus() {
-  if (confirmAction('Hapus data ini?')) {
-    resetForm();
-    showNotification('Data dihapus.', 'success');
+async function handleHapus() {
+  const selected = getSelectedRow();
+  
+  if (!selected) {
+    showNotification('Pilih data di tabel yang akan dihapus terlebih dahulu!', 'warning');
+    return;
+  }
+
+  if (confirmAction(`Hapus data dengan Register: ${selected.reg}?`)) {
+    try {
+      // showNotification('Sedang menghapus data...', 'info');
+      const result = await deleteRoll(selected.id);
+      
+      if (result.status === 'success') {
+        showNotification('✅ Data berhasil dihapus dari database', 'success');
+        
+        // Refresh tabel
+        if (window.formRollApp && typeof window.formRollApp.refreshTableData === 'function') {
+          await window.formRollApp.refreshTableData();
+        }
+        
+        resetForm();
+      } else {
+        throw new Error(result.message || 'Gagal menghapus data');
+      }
+    } catch (error) {
+      console.error('❌ Delete error:', error);
+      showNotification('Gagal menghapus data: ' + error.message, 'error');
+    }
   }
 }
 
@@ -230,14 +305,31 @@ function handleKeluar() {
   }
 }
 
-function handleResetFilter() {
+function handleLihat() {
   const startInput = document.getElementById('periode_awal');
   const endInput = document.getElementById('periode_akhir');
   
+  if (!startInput.value || !endInput.value) {
+    showNotification('Pilih periode awal dan akhir terlebih dahulu!', 'warning');
+    return;
+  }
+  
+  if (window.formRollApp && typeof window.formRollApp.refreshTableData === 'function') {
+    showNotification('Menarik data berdasarkan periode...', 'info');
+    window.formRollApp.refreshTableData(startInput.value, endInput.value);
+  } else {
+    showNotification('Aplikasi belum siap. Silakan refresh halaman.', 'error');
+  }
+}
+
+function handleResetFilter() {
+  const startInput = document.getElementById('periode_awal');
+  const endInput = document.getElementById('periode_akhir');
+
   let hasFilter = false;
   if (startInput && startInput.value) { startInput.value = ''; hasFilter = true; }
   if (endInput && endInput.value) { endInput.value = ''; hasFilter = true; }
-  
+
   if (window.formRollApp && typeof window.formRollApp.refreshTableData === 'function') {
     if (hasFilter) {
       showNotification('Filter di-reset. Menampilkan semua data.', 'info');
@@ -251,42 +343,42 @@ function handleResetFilter() {
 function handleExcel() {
   const startInput = document.getElementById('periode_awal');
   const endInput = document.getElementById('periode_akhir');
-  
+
   // Mengambil data yang saat ini aktif di tabel (setelah filter/pencarian dll)
   const appState = window.formRollApp;
   if (!appState || !appState.getFilteredData) return;
-  
+
   const data = appState.getFilteredData();
   if (!data || data.length === 0) {
     showNotification('Tidak ada data untuk diekspor', 'warning');
     return;
   }
-  
+
   showNotification('Mengekspor ke Excel (XLSX)...', 'info');
-  
+
   // Header Excel (Kolom Tabel)
   const headers = ['NO', 'TANGGAL', 'JAM', 'ROLL', 'SHIFT', 'MESIN', 'NAMA', 'DENIER', 'PANJANG', 'LEBAR', 'ANYAM', 'BERAT', 'TRACE CODE', 'REGISTER', 'KETERANGAN', 'PIC'];
-  
+
   // Map data ke bentuk array untuk Excel
   const rows = data.map((item, index) => [
     index + 1,
-    item.tgl, 
-    item.jam, 
-    item.roll, 
-    item.shift, 
-    item.mesin, 
-    item.nama, 
-    item.dnr, 
-    item.pj, 
-    item.lb, 
-    item.anyam, 
-    item.br, 
-    item.trace, 
-    item.reg, 
-    item.keterangan || '', 
+    item.tgl,
+    item.jam,
+    item.roll,
+    item.shift,
+    item.mesin,
+    item.nama,
+    item.dnr,
+    item.pj,
+    item.lb,
+    item.anyam,
+    item.br,
+    item.trace,
+    item.reg,
+    item.keterangan || '',
     item.user || ''
   ]);
-  
+
   // Cek apakah SheetJS tersedia
   if (typeof XLSX === 'undefined') {
     alert('Library Excel (SheetJS) belum dimuat. Periksa koneksi internet.');
@@ -295,18 +387,18 @@ function handleExcel() {
 
   // Gabungkan header dan baris data
   const worksheetData = [headers, ...rows];
-  
+
   // Buat worksheet dan workbook
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Data Roll");
-  
+
   // Tentukan nama file
   let fileName = 'Data_Roll_Produksi.xlsx';
   if (startInput && endInput && startInput.value && endInput.value) {
     fileName = `Data_Roll_${startInput.value}_sd_${endInput.value}.xlsx`;
   }
-    
+
   // Trigger download file .xlsx
   XLSX.writeFile(workbook, fileName);
 }
@@ -316,16 +408,16 @@ function handleExcel() {
  */
 function buildDetailedErrorMessage(error) {
   let message = 'Gagal menyimpan data';
-  
+
   if (error.message) {
     message += ': ' + error.message;
   }
-  
+
   // Jika error dari network/fetch
   if (error instanceof TypeError) {
     message = 'Gagal koneksi ke server. Periksa URL API atau server status.';
   }
-  
+
   console.error('Error details:', error);
   return message;
 }

@@ -25,15 +25,9 @@ export function getFormData() {
  * @param {object} data - Data yang akan diisi ke form
  */
 export function setFormData(data) {
-  // Ambil jam real-time saat ini
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const currentTime = `${hours}:${minutes}`;
-
   const mappedData = {
     'tanggal': data.tgl,
-    'jam': currentTime,
+    'jam': data.jam, // Gunakan jam asli dari data di database
     'roll_ke': data.roll,
     'group': data.shift,
     'mesin': data.mesin,
@@ -81,8 +75,16 @@ export function updateTimeNow() {
   const tglInput = getDOMElement('tanggal');
   const now = new Date();
 
-  // Update Jam
-  if (jamInput) {
+  // Jam berjalan REAL-TIME jika:
+  // 1. Sedang dalam mode BARU (tombol Baru active / tidak ada data terpilih)
+  // 2. Sedang dalam mode EDIT (tombol Edit active)
+  // 3. Sedang dalam mode LANJUT (tombol Lanjut active)
+  const isBaruActive = document.querySelector('.btn-primary.active');
+  const isEditActive = document.querySelector('.btn-warning.active');
+  const isLanjutActive = document.querySelector('.btn-lanjut.active');
+  const noDataSelected = !getSelectedRow();
+
+  if (jamInput && (isBaruActive || isEditActive || isLanjutActive || noDataSelected)) {
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
@@ -90,11 +92,31 @@ export function updateTimeNow() {
   }
 
   // Update Tanggal (hanya jika kosong, atau saat mode BARU)
+  const y = now.getFullYear();
+  const mo = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const fullDate = `${y}-${mo}-${d}`;
+
   if (tglInput && (!tglInput.value || (!getSelectedRow() && !isEditMode()))) {
-    const y = now.getFullYear();
-    const mo = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    tglInput.value = `${y}-${mo}-${d}`;
+    tglInput.value = fullDate;
+  }
+
+  // Update Periode Akhir (Selalu ikuti hari ini jika kosong atau belum disetel)
+  const periodeAkhirInput = document.getElementById('periode_akhir');
+  if (periodeAkhirInput && !periodeAkhirInput.value) {
+    periodeAkhirInput.value = fullDate;
+  }
+
+  // Update Periode Awal (Default: 1 Minggu Sebelumnya)
+  const periodeAwalInput = document.getElementById('periode_awal');
+  if (periodeAwalInput && !periodeAwalInput.value) {
+    const lastWeek = new Date();
+    lastWeek.setDate(now.getDate() - 7);
+    
+    const ly = lastWeek.getFullYear();
+    const lmo = String(lastWeek.getMonth() + 1).padStart(2, '0');
+    const ld = String(lastWeek.getDate()).padStart(2, '0');
+    periodeAwalInput.value = `${ly}-${lmo}-${ld}`;
   }
   
   // Update trace code juga jika memungkinkan
@@ -106,11 +128,9 @@ export function updateTimeNow() {
  */
 export function startRealTimeClock() {
   setInterval(() => {
-    // Hanya update otomatis jika sedang tidak mengedit data yang sudah ada
-    // (Agar jam tidak loncat saat user sedang melihat/mengedit data lama)
-    if (!getSelectedRow() && !isEditMode()) {
-      updateTimeNow();
-    }
+    // Panggil updateTimeNow setiap detik. 
+    // Logika apakah jam harus update atau diam ditangani di dalam updateTimeNow().
+    updateTimeNow();
   }, 1000);
 }
 
