@@ -203,6 +203,10 @@ function handleLanjut() {
     // Mode ON: Aktifkan mode edit dulu baru update nilai
     setEditMode(true);
 
+    // Matikan mode lain agar tidak bentrok
+    document.querySelector('.btn-primary')?.classList.remove('active');
+    document.querySelector('.btn-warning')?.classList.remove('active');
+
     // Hanya buka input tertentu untuk mode Lanjut
     toggleFormInputs(true, 'lanjut');
 
