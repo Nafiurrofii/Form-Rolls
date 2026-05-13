@@ -502,7 +502,7 @@ tbody tr:hover {
 
   tbody tr.selected-row {
     background: var(--yellow-light) !important;
-    outline: 1px solid var(--blue-mid);
+    /* outline: 1px solid var(--blue-mid); */
     outline-offset: -1px;
   }
 
