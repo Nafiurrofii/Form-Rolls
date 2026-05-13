@@ -50,6 +50,11 @@ export function setFormData(data) {
 export function resetForm() {
   clearMultipleValues(formFieldIds);
   setSelectedRow(null);
+  
+  // Hapus class selected-row dari semua baris di tabel
+  const allRows = document.querySelectorAll('#table_body tr');
+  allRows.forEach(r => r.classList.remove('selected-row'));
+
   disableEditMode(); // Memastikan UI reset (termasuk tombol Lanjut & Edit)
 
   // Reset status tombol BARU

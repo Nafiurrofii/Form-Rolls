@@ -52,7 +52,7 @@ export function renderTable(data, perPage, totalVirtual) {
         <td>${row.user}</td>
       `;
       tr.style.cursor = 'pointer';
-      tr.addEventListener('click', () => handleRowClick(row));
+      tr.addEventListener('click', (e) => handleRowClick(row, e.currentTarget));
       tbody.appendChild(tr);
     });
   }
@@ -71,9 +71,20 @@ export function renderTable(data, perPage, totalVirtual) {
 /**
  * Handle row click - load data ke form
  * @param {object} row - Data row
+ * @param {HTMLElement} trElem - Element tr yang diklik
  */
-function handleRowClick(row) {
+function handleRowClick(row, trElem = null) {
   setSelectedRow(row);
+  
+  // Hapus class selected-row dari semua baris
+  const allRows = document.querySelectorAll('#table_body tr');
+  allRows.forEach(r => r.classList.remove('selected-row'));
+  
+  // Tambahkan class selected-row ke baris yang diklik
+  if (trElem) {
+    trElem.classList.add('selected-row');
+  }
+
   setFormData(row);
   setEditMode(true); // Status internal Edit Mode tetap aktif agar tombol SIMPAN tahu ini update
   toggleFormInputs(false); // Tapi visual form dikunci (disable) sampai klik EDIT/LANJUT
