@@ -65,6 +65,77 @@ function createRoll($pdo) {
 
 
 /**
+ * CONTINUE ROLL
+ * UPDATE LIMITED FIELDS ONLY
+ */
+function continueRoll($pdo, $id) {
+
+    try {
+
+        $input = json_decode(file_get_contents("php://input"), true);
+
+        error_log("CONTINUE ROLL INPUT (ID: $id): " . json_encode($input));
+
+        if (!$id) {
+
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'ID is required for continue'
+            ]);
+
+            return;
+        }
+
+        if (!$input) {
+
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Invalid input'
+            ]);
+
+            return;
+        }
+
+        /**
+         * ONLY ALLOWED FIELDS
+         */
+        $allowedData = [
+
+            'jam'        => $input['jam'] ?? null,
+            'roll'       => $input['roll'] ?? null,
+            'group_name' => $input['group_name'] ?? null,
+            'mesin'      => $input['mesin'] ?? null,
+            'panjang'    => $input['panjang'] ?? null,
+            'lebar'      => $input['lebar'] ?? null,
+            'berat'      => $input['berat'] ?? null,
+            'pic'        => $input['pic'] ?? null,
+
+        ];
+
+        $roll = new Roll($pdo);
+
+        $roll->continue($id, $allowedData);
+
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Data berhasil dilanjutkan'
+        ]);
+
+    } catch (Throwable $e) {
+
+        error_log("CONTINUE ROLL ERROR: " . $e->getMessage());
+
+        http_response_code(500);
+
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'System error: ' . $e->getMessage()
+        ]);
+    }
+}
+
+
+/**
  * UPDATE
  */
 function updateRoll($pdo, $id) {

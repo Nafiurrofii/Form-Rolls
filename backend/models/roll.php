@@ -170,4 +170,36 @@ class Roll {
         return true;
     }
 
+    public function continue($id, $data) {
+
+        $sql = "
+            UPDATE rolls
+            SET
+                jam = :jam,
+                roll = :roll,
+                group_name = :group_name,
+                mesin = :mesin,
+                panjang = :panjang,
+                lebar = :lebar,
+                berat = :berat,
+                pic = :pic,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        return $stmt->execute([
+            ':jam'        => $data['jam'],
+            ':roll'       => $data['roll'],
+            ':group_name' => $data['group_name'],
+            ':mesin'      => $data['mesin'],
+            ':panjang'    => $data['panjang'],
+            ':lebar'      => $data['lebar'],
+            ':berat'      => $data['berat'],
+            ':pic'        => $data['pic'],
+            ':id'         => $id
+        ]);
+    }
+
 }

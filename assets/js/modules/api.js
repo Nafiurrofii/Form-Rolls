@@ -107,6 +107,43 @@ export async function saveRoll(data, id = null) {
     throw error;
   }
 }
+
+/**
+ * CONTINUE roll (Limited update)
+ */
+export async function continueRoll(data, id) {
+  const payload = {
+    jam: data.jam || new Date().toTimeString().split(' ')[0],
+    roll: parseInt(data.roll_ke) || 0,
+    group_name: data.group || '',
+    mesin: data.mesin || '',
+    panjang: parseInt(data.panjang) || 0,
+    lebar: parseInt(data.lebar) || 0,
+    berat: data.berat || '',
+    pic: data.pic || ''
+  };
+
+  const endpoint = `${API_BASE_URL}?action=continue&id=${id}`;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('❌ API Error (Continue):', error);
+    throw error;
+  }
+}
+
 /**
  * DELETE roll
  */

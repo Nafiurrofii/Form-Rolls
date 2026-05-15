@@ -4,7 +4,7 @@
 
 import { showNotification, confirmAction, setMultipleValues } from '../utils.js';
 import { getFormData, setFormData, resetForm, validateForm, enableEditMode, disableEditMode, updateTraceCode, updateTimeNow, toggleFormInputs } from '../modules/form.js';
-import { saveRoll, deleteRoll } from '../modules/api.js';
+import { saveRoll, deleteRoll, continueRoll } from '../modules/api.js';
 import { isEditMode, setEditMode, getSelectedRow } from '../state.js';
 import { openPrintModal } from './printModal.js';
 // NOTE: Do NOT import storage functions - we save to DATABASE via API, not localStorage!
@@ -144,8 +144,18 @@ async function handleSimpan() {
     }
 
     // showNotification('Sedang menyimpan ke database...', 'info');
-    console.log('⏳ Memanggil saveRoll() untuk simpan ke API/DATABASE');
-    const result = await saveRoll(formData, rollId);
+    console.log('⏳ Memanggil API untuk simpan/update/continue');
+    
+    let result;
+    const isLanjut = document.querySelector('.btn-lanjut.active');
+
+    if (isLanjut && rollId) {
+      console.log('⏩ Mode LANJUT aktif: Memanggil continueRoll()');
+      result = await continueRoll(formData, rollId);
+    } else {
+      console.log('💾 Mode BARU/EDIT aktif: Memanggil saveRoll()');
+      result = await saveRoll(formData, rollId);
+    }
 
     console.log('📤 Response dari API:', result);
     if (result.status === 'success') {

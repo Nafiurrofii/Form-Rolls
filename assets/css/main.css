@@ -501,8 +501,7 @@ tbody tr:hover {
   }
 
   tbody tr.selected-row {
-    background: var(--yellow-light) !important;
-    /* outline: 1px solid var(--blue-mid); */
+    background: var(--blue-700) !important;
     outline-offset: -1px;
   }
 
@@ -527,7 +526,7 @@ tbody tr:hover {
 
   /* No. column */
   tbody td:first-child {
-    color: var(--gray-400);
+    color: var(--gray-600);
     font-size: 10.5px;
     font-weight: 600;
   }
