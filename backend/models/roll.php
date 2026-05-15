@@ -202,4 +202,107 @@ class Roll {
         ]);
     }
 
+    public function getChartData($days = 14, $startDate = null, $endDate = null) {
+        // If specific range provided, use it
+        if ($startDate && $endDate) {
+            $start = new DateTime($startDate);
+            $end = new DateTime($endDate);
+            $interval = $start->diff($end);
+            $days = $interval->days + 1;
+            
+            // Limit to 90 days for performance
+            if ($days > 90) $days = 90;
+        } else {
+            $days = (int)$days;
+            if ($days <= 0) $days = 14;
+            if ($days > 90) $days = 90;
+            $endDate = date('Y-m-d');
+            $startDate = date('Y-m-d', strtotime("-".($days-1)." days"));
+        }
+
+        // 1. Summary (Always for today)
+        $summary = [
+            'hariIni' => 0,
+            'kemarin' => 0,
+            'bulan' => 0,
+            'rata' => 0,
+            'mesinAktif' => 0,
+            'groupAktif' => 0,
+            'shiftAktif' => '-'
+        ];
+
+        $today = date('Y-m-d');
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        $firstDayOfMonth = date('Y-m-01');
+
+        $stmt = $this->pdo->query("SELECT 
+            SUM(CASE WHEN tanggal = '$today' THEN 1 ELSE 0 END) as hari_ini,
+            SUM(CASE WHEN tanggal = '$yesterday' THEN 1 ELSE 0 END) as kemarin,
+            SUM(CASE WHEN tanggal >= '$firstDayOfMonth' THEN 1 ELSE 0 END) as bulan
+            FROM rolls");
+        $counts = $stmt->fetch();
+        $summary['hariIni'] = (int)$counts['hari_ini'];
+        $summary['kemarin'] = (int)$counts['kemarin'];
+        $summary['bulan'] = (int)$counts['bulan'];
+
+        $dayOfMonth = (int)date('j');
+        $summary['rata'] = $dayOfMonth > 0 ? round($summary['bulan'] / $dayOfMonth) : 0;
+
+        $stmt = $this->pdo->query("SELECT COUNT(DISTINCT mesin) as m, COUNT(DISTINCT group_name) as g, GROUP_CONCAT(DISTINCT group_name SEPARATOR '/') as s FROM rolls WHERE tanggal = '$today'");
+        $active = $stmt->fetch();
+        $summary['mesinAktif'] = (int)$active['m'];
+        $summary['groupAktif'] = (int)$active['g'];
+        $summary['shiftAktif'] = $active['s'] ? $active['s'] : '-';
+
+        // 2. Top Produk (Last 30 days)
+        $stmt = $this->pdo->query("SELECT nama, COUNT(*) as total FROM rolls WHERE tanggal >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY nama ORDER BY total DESC LIMIT 5");
+        $topRows = $stmt->fetchAll();
+        $colors = ['#1d6fd8', '#0ea5c9', '#10b981', '#f59e0b', '#8b5cf6'];
+        $topProduk = [];
+        foreach ($topRows as $i => $row) {
+            $topProduk[] = [
+                'nama' => $row['nama'],
+                'total' => (int)$row['total'],
+                'color' => isset($colors[$i]) ? $colors[$i] : '#94a3b8'
+            ];
+        }
+
+        // 3. Chart Data
+        $chartData = [];
+        for ($i = 0; $i < $days; $i++) {
+            $date = date('Y-m-d', strtotime("$startDate +$i days"));
+            if ($date > $endDate) break;
+            $chartData[$date] = [
+                'tanggal' => $date,
+                'total' => 0,
+                'items' => []
+            ];
+        }
+
+        $stmt = $this->pdo->prepare("SELECT tanggal, nama, roll, mesin, group_name, jam, pic FROM rolls WHERE tanggal BETWEEN :start AND :end ORDER BY tanggal ASC, jam ASC");
+        $stmt->execute([':start' => $startDate, ':end' => $endDate]);
+        $rows = $stmt->fetchAll();
+        foreach ($rows as $row) {
+            $t = $row['tanggal'];
+            if (isset($chartData[$t])) {
+                $chartData[$t]['total']++;
+                $chartData[$t]['items'][] = [
+                    'nama' => $row['nama'],
+                    'roll' => $row['roll'],
+                    'mesin' => $row['mesin'],
+                    'group' => $row['group_name'],
+                    'jam' => date('H:i', strtotime($row['jam'])),
+                    'pic' => $row['pic']
+                ];
+            }
+        }
+
+        return [
+            'status' => 'success',
+            'summary' => $summary,
+            'topProduk' => $topProduk,
+            'data' => array_values($chartData)
+        ];
+    }
+
 }

@@ -35,6 +35,7 @@ export const appState = {
   filteredData: [],
   selectedRow: null,
   isEditMode: false,
+  currentUser: null,
 };
 
 /* ─── GETTER / SETTER ────────────────────────────– */
@@ -69,6 +70,14 @@ export function setEditMode(mode) {
 
 export function isEditMode() {
   return appState.isEditMode;
+}
+
+export function setCurrentUser(user) {
+  appState.currentUser = user;
+}
+
+export function getCurrentUser() {
+  return appState.currentUser;
 }
 
 /* ─── RESET STATE ────────────────────────────────– */

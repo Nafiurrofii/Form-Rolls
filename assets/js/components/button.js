@@ -5,8 +5,9 @@
 import { showNotification, confirmAction, setMultipleValues } from '../utils.js';
 import { getFormData, setFormData, resetForm, validateForm, enableEditMode, disableEditMode, updateTraceCode, updateTimeNow, toggleFormInputs } from '../modules/form.js';
 import { saveRoll, deleteRoll, continueRoll } from '../modules/api.js';
-import { isEditMode, setEditMode, getSelectedRow } from '../state.js';
+import { isEditMode, setEditMode, getSelectedRow, getCurrentUser } from '../state.js';
 import { openPrintModal } from './printModal.js';
+import { showAdminVerification } from '../modules/auth.js';
 // NOTE: Do NOT import storage functions - we save to DATABASE via API, not localStorage!
 
 /**
@@ -245,17 +246,28 @@ function handleLanjut() {
   }
 }
 
-function handleEditAction() {
+async function handleEditAction() {
   const btnEdit = document.querySelector('.btn-warning');
   if (!btnEdit) return;
 
-  const isActive = btnEdit.classList.toggle('active');
+  const isActive = btnEdit.classList.contains('active');
 
-  if (isActive) {
+  if (!isActive) {
     const selected = getSelectedRow();
     
     // Validasi: Harus pilih data dari tabel dulu
     if (selected) {
+      // Periksa role user
+      const user = getCurrentUser();
+      if (user && user.role === 'operator') {
+        const verified = await showAdminVerification();
+        if (!verified) {
+          // Tutup modal tanpa alert/notifikasi sesuai request user
+          return;
+        }
+      }
+
+      btnEdit.classList.add('active');
       enableEditMode();
       
       // Matikan mode lain agar tidak bentrok
@@ -263,10 +275,10 @@ function handleEditAction() {
       document.querySelector('.btn-lanjut')?.classList.remove('active');
     } else {
       showNotification('Pilih data di tabel terlebih dahulu', 'warning');
-      btnEdit.classList.remove('active');
     }
   } else {
     // Mode OFF: Kunci kembali form
+    btnEdit.classList.remove('active');
     disableEditMode();
     toggleFormInputs(false);
     
@@ -289,6 +301,16 @@ async function handleHapus() {
   }
 
   if (confirmAction(`Hapus data dengan Register: ${selected.reg}?`)) {
+    // Periksa role user
+    const user = getCurrentUser();
+    if (user && user.role === 'operator') {
+      const verified = await showAdminVerification();
+      if (!verified) {
+        // Tutup modal tanpa alert/notifikasi sesuai request user
+        return;
+      }
+    }
+
     try {
       // showNotification('Sedang menghapus data...', 'info');
       const result = await deleteRoll(selected.id);
@@ -313,10 +335,7 @@ async function handleHapus() {
 }
 
 function handleKeluar() {
-  if (confirmAction('Keluar dari form?')) {
-    resetForm();
-    showNotification('Keluar dari form.', 'info');
-  }
+  resetForm();
 }
 
 function handleLihat() {

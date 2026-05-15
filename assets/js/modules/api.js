@@ -25,7 +25,7 @@ export async function fetchRolls(startDate = null, endDate = null) {
       url += `&start=${startDate}&end=${endDate}`;
     }
     
-    const response = await fetch(url);
+    const response = await fetch(url, { credentials: 'include' });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -48,7 +48,7 @@ export async function fetchRolls(startDate = null, endDate = null) {
  * Fetch single roll by ID
  */
 export async function fetchRollById(id) {
-  const response = await fetch(`${API_BASE_URL}?action=get&id=${id}`);
+  const response = await fetch(`${API_BASE_URL}?action=get&id=${id}`, { credentials: 'include' });
   return response.json();
 }
 
@@ -84,6 +84,7 @@ export async function saveRoll(data, id = null) {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(payload)
     });
 
@@ -129,6 +130,7 @@ export async function continueRoll(data, id) {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(payload)
     });
 
@@ -152,7 +154,8 @@ export async function deleteRoll(id) {
   
   try {
     const response = await fetch(endpoint, {
-      method: 'POST'
+      method: 'POST',
+      credentials: 'include'
     });
 
     if (!response.ok) {

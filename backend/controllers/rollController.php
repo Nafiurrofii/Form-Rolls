@@ -154,6 +154,11 @@ function updateRoll($pdo, $id) {
         $roll = new Roll($pdo);
         $roll->update($id, $input);
 
+        // Revoke temporary admin privilege
+        if (isset($_SESSION['temp_admin_privilege'])) {
+            unset($_SESSION['temp_admin_privilege']);
+        }
+
         echo json_encode([
             'status' => 'success',
             'message' => 'Data berhasil diupdate'
@@ -185,12 +190,38 @@ function deleteRoll($pdo, $id) {
         $roll = new Roll($pdo);
         $roll->delete($id);
 
+        // Revoke temporary admin privilege
+        if (isset($_SESSION['temp_admin_privilege'])) {
+            unset($_SESSION['temp_admin_privilege']);
+        }
+
         echo json_encode([
             'status' => 'success',
             'message' => 'Data berhasil dihapus'
         ]);
     } catch (Throwable $e) {
         error_log("DELETE ROLL ERROR: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'System error: ' . $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * GET CHART DATA
+ */
+function getChartData($pdo) {
+    try {
+        $days = isset($_GET['days']) ? (int)$_GET['days'] : 14;
+        $start = isset($_GET['start']) ? $_GET['start'] : null;
+        $end = isset($_GET['end']) ? $_GET['end'] : null;
+        
+        $roll = new Roll($pdo);
+        $data = $roll->getChartData($days, $start, $end);
+        echo json_encode($data);
+    } catch (Throwable $e) {
         http_response_code(500);
         echo json_encode([
             'status' => 'error',

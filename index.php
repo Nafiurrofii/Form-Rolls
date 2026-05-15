@@ -14,6 +14,9 @@
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/print-modal.css">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link rel="icon" type="image/png" href="assets/images/logo-ljp.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -21,17 +24,26 @@
   <!-- ─── TOPBAR ─────────────────────────────────────── -->
   <div class="topbar">
     <div class="topbar-brand">
-      <div class="topbar-icon-wrap">📦</div>
+      <div class="topbar-icon-wrap">
+        <img src="assets/images/logo-ljp.png" alt="Logo" style="height: 32px; width: auto;">
+      </div>
       <div class="topbar-text">
         <h1>Form Roll</h1>
         <span class="topbar-sub">PT. Langgeng Jaya Plastindo — Textile Production</span>
       </div>
     </div>
     <div class="topbar-meta">
-      <span class="topbar-badge">
+      <div class="user-badge" id="topbarUserBadge" style="display: none;">
+        <div class="user-avatar" id="topbarUserAvatar">?</div>
+        <span><span id="topbarUserName">User</span> (<span id="topbarUserRole">Role</span>)</span>
+        <button class="btn-logout" id="btnLogout" title="Logout">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+      </div>
+      <!-- <span class="topbar-badge">
         <span class="topbar-badge-dot"></span>
         Online
-      </span>
+      </span> -->
     </div>
   </div>
 
@@ -324,7 +336,169 @@
         <div class="pagination" id="pagination"></div>
       </div>
     </div>
+
+    <!-- ─── DASHBOARD SECTION ──────────────────────── -->
+    <div class="dashboard-section" style="margin-top: 30px;">
+      
+      <div class="page-header" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div class="page-title" style="font-size: 1.5rem; font-weight: 700; color: var(--text);">Dashboard Produksi</div>
+          <div class="page-sub" style="font-size: 0.875rem; color: var(--text-3);">Statistik dan monitoring data roll harian</div>
+        </div>
+        <div class="date-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width: 16px; height: 16px;"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+          <span id="currentDate">–</span>
+        </div>
+      </div>
+
+      <!-- SUMMARY CARDS -->
+      <div class="summary-grid">
+        <div class="stat-card blue">
+          <div class="stat-top">
+            <div class="stat-icon blue">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            </div>
+            <div class="stat-trend up" style="visibility:hidden">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>
+              +
+            </div>
+          </div>
+          <div class="stat-value" id="s-hari-ini">–</div>
+          <div class="stat-label">Total Data Hari Ini</div>
+          <div class="stat-foot">Dibandingkan kemarin: <strong id="s-kemarin">–</strong> data</div>
+        </div>
+
+        <div class="stat-card green">
+          <div class="stat-top">
+            <div class="stat-icon green">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+            </div>
+            <div class="stat-trend up" style="visibility:hidden">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>
+              +
+            </div>
+          </div>
+          <div class="stat-value" id="s-bulan">–</div>
+          <div class="stat-label">Total Produksi Bulan Ini</div>
+          <div class="stat-foot">Rata-rata harian: <strong id="s-rata">–</strong> data</div>
+        </div>
+
+        <div class="stat-card amber">
+          <div class="stat-top">
+            <div class="stat-icon amber">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+            </div>
+            <div class="stat-trend same" style="visibility:hidden">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 12H4v-2h16v2z"/></svg>
+              Stabil
+            </div>
+          </div>
+          <div class="stat-value" id="s-mesin">–</div>
+          <div class="stat-label">Mesin Aktif</div>
+          <div class="stat-foot">Mesin mencetak hari ini</div>
+        </div>
+
+        <div class="stat-card purple">
+          <div class="stat-top">
+            <div class="stat-icon purple">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            </div>
+            <div class="stat-trend up" style="visibility:hidden">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>
+              Aktif
+            </div>
+          </div>
+          <div class="stat-value" id="s-group">–</div>
+          <div class="stat-label">Group Aktif</div>
+          <div class="stat-foot">Shift berjalan: <strong id="s-shift">–</strong></div>
+        </div>
+      </div>
+
+      <!-- CHART + MINI STATS -->
+      <div class="chart-row">
+        <!-- BAR CHART -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zM16.2 13h2.8v6h-2.8v-6z"/></svg>
+              </div>
+              <div>
+                <div class="card-title">Produksi Per Tanggal</div>
+                <div class="card-sub">Klik batang untuk melihat detail data</div>
+              </div>
+            </div>
+            <div class="chart-filters">
+              <button class="filter-btn active" data-days="7">Mingguan</button>
+              <button class="filter-btn" data-days="30">Bulanan</button>
+              <button class="filter-btn" id="customFilterBtn">Custom</button>
+            </div>
+            <!-- Custom Date Range Picker (Hidden) -->
+            <div id="customDateRange" class="custom-date-popover" style="display:none">
+              <div class="popover-body">
+                <div class="date-input-group">
+                  <input type="date" id="dashStart" class="dash-date-input">
+                  <span>-</span>
+                  <input type="date" id="dashEnd" class="dash-date-input">
+                </div>
+                <button id="applyCustomDash" class="apply-btn">Terapkan</button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap">
+              <canvas id="prodChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- MINI STATS -->
+        <div class="card mini-stats-card">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 3a3 3 0 110 6 3 3 0 010-6zm5 11H7v-.5c0-2.21 2.24-4 5-4s5 1.79 5 4v.5z"/></svg>
+              </div>
+              <div>
+                <div class="card-title">Top Produk</div>
+                <div class="card-sub">30 hari terakhir</div>
+              </div>
+            </div>
+          </div>
+          <div id="miniStatsList"></div>
+        </div>
+      </div>
+
+      <!-- DETAIL PANEL -->
+      <!-- <div class="card detail-panel">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+            </div>
+            <div>
+              <div class="card-title" id="detailTitle">Detail Data Roll</div>
+              <div class="card-sub" id="detailSub">Pilih tanggal pada chart di atas</div>
+            </div>
+          </div>
+          <div class="chip" id="detailCount" style="display:none"></div>
+        </div>
+        <div id="detailContent">
+          <div class="detail-empty">
+            <div class="detail-empty-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zM16.2 13h2.8v6h-2.8v-6z"/></svg>
+            </div>
+            <div class="detail-empty-title">Belum ada data dipilih</div>
+            <div class="detail-empty-sub">Klik salah satu batang pada chart untuk melihat detail produksi</div>
+          </div>
+        </div>
+      </div> -->
+    </div><!-- /.dashboard-section -->
+
   </div><!-- /main -->
+
+  <!-- TOOLTIP -->
+  <div class="custom-tooltip" id="tooltip"></div>
 
   <!-- ═══════════════════════════════════════════════════
      PRINT MODAL
@@ -497,6 +671,88 @@
   <div class="pm-toast" id="pmToast">
     <span id="pmToastIco">✓</span>
     <span id="pmToastTxt">OK</span>
+  </div>
+
+  <!-- ─── AUTHENTICATION MODALS ──────────────────────── -->
+  
+  <!-- Admin Verification Modal -->
+  <div class="admin-verify-modal" id="adminVerifyModal">
+    <div class="admin-verify-card">
+      <button class="av-close-top" id="avCloseTopBtn" type="button" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+
+      <div class="av-header">
+        <div class="av-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <div class="av-header-text">
+          <div class="av-title">OTORISASI ADMINISTRATOR</div>
+          <div class="av-subtitle">Aksi ini membutuhkan izin dari Administrator.</div>
+        </div>
+      </div>
+
+      <div class="av-alert av-alert-warning">
+        <div class="av-alert-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+        </div>
+        <div class="av-alert-title">AKSES TERBATAS</div>
+        <div class="av-alert-divider"></div>
+        <div class="av-alert-text">Hanya untuk tindakan ini</div>
+      </div>
+      
+      <div class="auth-error" id="avError" style="margin: 0 32px 16px;">Kredensial tidak valid.</div>
+      
+      <form class="auth-form av-form" id="avForm" onsubmit="event.preventDefault();">
+        <div class="av-body">
+          <div class="field-group with-icon">
+            <label class="av-label">Username Administrator</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon left">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              </span>
+              <input type="text" id="avUsername" placeholder="Masukkan username administrator" required autocomplete="username">
+            </div>
+          </div>
+          
+          <div class="field-group with-icon">
+            <label class="av-label">Password Administrator</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon left">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              </span>
+              <input type="password" id="avPassword" placeholder="Masukkan password administrator" required autocomplete="current-password">
+              <button type="button" class="input-icon right toggle-password" id="avTogglePassword" aria-label="Toggle password visibility">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="av-alert av-alert-info">
+            <div class="av-alert-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            </div>
+            <div class="av-alert-text">
+              Aksi ini memerlukan persetujuan administrator.<br>
+              Setelah berhasil, Anda akan kembali sebagai operator.
+            </div>
+          </div>
+        </div>
+
+        <div class="av-footer">
+          <button type="button" class="btn btn-neutral av-btn-cancel" id="avCancelBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            BATAL
+          </button>
+          <button type="submit" class="btn btn-primary av-btn-verify" id="avSubmitBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            VERIFIKASI
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- ─── THIRD PARTY LIBRARIES ─────────────────────── -->

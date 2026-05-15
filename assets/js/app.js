@@ -12,6 +12,8 @@ import { showNotification } from './utils.js';
 import { fetchRolls } from './modules/api.js';
 import { resetForm, attachTraceCodeListeners, startRealTimeClock } from './modules/form.js';
 import { setupPrintModal } from './components/printModal.js';
+import { checkSession, updateUserBadge, initAuthUI } from './modules/auth.js';
+import { initDashboard } from './modules/dashboard.js';
 
 /**
  * Initialize aplikasi
@@ -19,9 +21,20 @@ import { setupPrintModal } from './components/printModal.js';
 async function initializeApp() {
   console.log('🚀 Initializing Form Roll Application...');
 
+  // Initialize Auth
+  const user = await checkSession();
+  if (!user) {
+    window.location.href = 'login.php';
+    return; // Berhenti di sini
+  }
+
+  // Bind logout button and other auth UI for index.php
+  initAuthUI();
+
   loadPreferences();
   setupEventListeners();
 
+  updateUserBadge(user);
   // Fetch data dari API
   await refreshTableData();
 
@@ -29,6 +42,7 @@ async function initializeApp() {
   attachTraceCodeListeners();
   startRealTimeClock();
   setupPrintModal();
+  initDashboard();
   
   // Kosongkan form pada saat awal aplikasi dimuat
   resetForm();
