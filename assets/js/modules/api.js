@@ -12,6 +12,19 @@ const getAPIBaseUrl = () => {
 
 const API_BASE_URL = getAPIBaseUrl();
 
+async function parseJsonResponse(response, context = 'API') {
+  const responseText = await response.text();
+
+  try {
+    return JSON.parse(responseText);
+  } catch (error) {
+    const preview = responseText.replace(/\s+/g, ' ').trim().slice(0, 180);
+    throw new Error(
+      `${context} mengembalikan response non-JSON${preview ? `: ${preview}` : ''}`
+    );
+  }
+}
+
 /**
  * Fetch semua rolls dari API
  * @param {string} startDate - Format YYYY-MM-DD (opsional)
@@ -31,7 +44,7 @@ export async function fetchRolls(startDate = null, endDate = null, page = 1, lim
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const result = await response.json();
+    const result = await parseJsonResponse(response, 'Fetch rolls');
     
     if (result.status !== 'success') {
       throw new Error(result.message || 'Unknown error');
@@ -53,7 +66,7 @@ export async function fetchRolls(startDate = null, endDate = null, page = 1, lim
  */
 export async function fetchRollById(id) {
   const response = await fetch(`${API_BASE_URL}?action=get&id=${id}`, { credentials: 'include' });
-  return response.json();
+  return parseJsonResponse(response, 'Fetch roll by ID');
 }
 
 /**
@@ -99,7 +112,7 @@ export async function saveRoll(data, id = null) {
       throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
     }
     
-    const result = await response.json();
+    const result = await parseJsonResponse(response, 'Save roll');
     console.log('✅ Server response:', result);
     
     if (result.status !== 'success') {
@@ -143,7 +156,7 @@ export async function continueRoll(data, id) {
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
-    return await response.json();
+    return await parseJsonResponse(response, 'Continue roll');
   } catch (error) {
     console.error('❌ API Error (Continue):', error);
     throw error;
@@ -166,7 +179,7 @@ export async function deleteRoll(id) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return await parseJsonResponse(response, 'Delete roll');
   } catch (error) {
     console.error('❌ API Error:', error);
     throw error;

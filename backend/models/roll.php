@@ -8,6 +8,32 @@ class Roll {
         $this->pdo = $pdo;
     }
 
+    private function buildRegisterValue($tanggal, $urut) {
+        $yearTwoDigit = substr((string)$tanggal, 2, 2);
+        return $yearTwoDigit . $urut;
+    }
+
+    private function syncRegisterAndBarcode($urut) {
+        $stmt = $this->pdo->prepare("SELECT tanggal FROM rolls WHERE urut = ?");
+        $stmt->execute([$urut]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$result || empty($result['tanggal'])) {
+            throw new Exception('Tanggal data tidak ditemukan untuk generate register');
+        }
+
+        $registerValue = $this->buildRegisterValue($result['tanggal'], $urut);
+
+        $updateSql = "UPDATE rolls SET register = :val, barcode = :val WHERE urut = :urut";
+        $updateStmt = $this->pdo->prepare($updateSql);
+        $updateStmt->execute([
+            ':val' => $registerValue,
+            ':urut' => $urut
+        ]);
+
+        return $registerValue;
+    }
+
     /**
      * GET ALL DATA
      */
@@ -179,19 +205,15 @@ class Roll {
             ':pic' => $data['pic']
         ]);
 
-        $lastUrut = $this->pdo->lastInsertId();
-
-        // Update register dan barcode otomatis sama dengan urut
-        $updateSql = "UPDATE rolls SET register = :val, barcode = :val WHERE urut = :urut";
-        $updateStmt = $this->pdo->prepare($updateSql);
-        $updateStmt->execute([
-            ':val' => $lastUrut,
-            ':urut' => $lastUrut
-        ]);
+        $lastUrut = (int)$this->pdo->lastInsertId();
+        $registerValue = $this->syncRegisterAndBarcode($lastUrut);
 
         return [
-            'id' => $lastUrut
+            'id' => $lastUrut,
+            'register' => $registerValue,
+            'barcode' => $registerValue
         ];
+
     }
 
     /**
@@ -319,10 +341,14 @@ class Roll {
             ':pic'        => $data['pic']
         ]);
 
-        // Ambil urut dari record yang baru dibuat
-        $lastUrut = $this->pdo->query("SELECT MAX(urut) as urut FROM rolls")->fetch(PDO::FETCH_ASSOC)['urut'];
+        $lastUrut = (int)$this->pdo->lastInsertId();
+        $registerValue = $this->syncRegisterAndBarcode($lastUrut);
 
-        return (int)$lastUrut;
+        return [
+            'id' => $lastUrut,
+            'register' => $registerValue,
+            'barcode' => $registerValue
+        ];
     }
 
     public function getChartData($days = 14, $startDate = null, $endDate = null) {

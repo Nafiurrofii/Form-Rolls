@@ -132,7 +132,7 @@ async function handleSimpan() {
     console.log('⏳ Memanggil API untuk simpan/update/continue');
     
     let result;
-    const isLanjut = document.querySelector('.btn-lanjut.active');
+    const isLanjut = Boolean(document.querySelector('.btn-lanjut.active'));
 
     if (isLanjut && rollId) {
       console.log('⏩ Mode LANJUT aktif: Memanggil continueRoll()');
@@ -160,10 +160,9 @@ async function handleSimpan() {
       // Buka print modal dengan data yang baru disimpan
       openPrintModal({
         ...formData,
-        // Barcode dan Register otomatis sama dengan nilai URUT dari database
-        // Jika sedang EDIT, ambil dari data yang sudah ada di baris tersebut
-        register: editing ? (selected.reg || '—') : (result.data?.id || '—'),
-        barcode: editing ? (selected.barcode || '—') : (result.data?.id || '—')
+        // Untuk EDIT gunakan nilai baris lama, untuk BARU/LANJUT gunakan nilai hasil simpan terbaru
+        register: (editing && !isLanjut) ? (selected.reg || '—') : (result.data?.register || result.data?.id || '—'),
+        barcode: (editing && !isLanjut) ? (selected.barcode || '—') : (result.data?.barcode || result.data?.id || '—')
       });
 
       // Reset form setelah modal dibuka

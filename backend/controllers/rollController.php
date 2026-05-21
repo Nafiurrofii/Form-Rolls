@@ -119,20 +119,12 @@ function continueRoll($pdo, $id) {
 
         $roll = new Roll($pdo);
 
-        $lastUrut = $roll->continue($id, $allowedData);
-
-        // Update register dan barcode otomatis
-        $updateSql = "UPDATE rolls SET register = :val, barcode = :val WHERE urut = :urut";
-        $updateStmt = $pdo->prepare($updateSql);
-        $updateStmt->execute([
-            ':val' => $lastUrut,
-            ':urut' => $lastUrut
-        ]);
+        $result = $roll->continue($id, $allowedData);
 
         echo json_encode([
             'status' => 'success',
             'message' => 'Data berhasil dilanjutkan',
-            'data' => ['id' => $lastUrut]
+            'data' => $result
         ]);
 
     } catch (Throwable $e) {
