@@ -32,7 +32,9 @@ export const totalVirtualRecords = 1250;
 // State global aplikasi
 export const appState = {
   currentPage: 1,
+  sourceData: [],
   filteredData: [],
+  totalRecords: 0,
   selectedRow: null,
   isEditMode: false,
   currentUser: null,
@@ -54,6 +56,22 @@ export function setFilteredData(data) {
 
 export function getFilteredData() {
   return appState.filteredData;
+}
+
+export function setSourceData(data) {
+  appState.sourceData = data;
+}
+
+export function getSourceData() {
+  return appState.sourceData;
+}
+
+export function setTotalRecords(total) {
+  appState.totalRecords = total;
+}
+
+export function getTotalRecords() {
+  return appState.totalRecords;
 }
 
 export function setSelectedRow(row) {
@@ -83,7 +101,9 @@ export function getCurrentUser() {
 /* ─── RESET STATE ────────────────────────────────– */
 export function resetState() {
   appState.currentPage = 1;
+  appState.sourceData = [];
   appState.filteredData = [];
+  appState.totalRecords = 0;
   appState.selectedRow = null;
   appState.isEditMode = false;
 }

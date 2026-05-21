@@ -3,7 +3,7 @@
    ──────────────────────────────────────────────────── */
 
 import { getDOMElement, searchData } from '../utils.js';
-import { rawData, setFilteredData, setCurrentPage } from '../state.js';
+import { getSourceData, setFilteredData, setCurrentPage } from '../state.js';
 
 /**
  * Get query pencarian dari input
@@ -20,7 +20,8 @@ export function getSearchQuery() {
  */
 export function applyFilter() {
   const query = getSearchQuery();
-  const filtered = searchData(rawData, query);
+  const sourceData = getSourceData();
+  const filtered = query ? searchData(sourceData, query) : sourceData;
   setFilteredData(filtered);
   setCurrentPage(1); // Reset ke halaman pertama
   return filtered;
@@ -46,8 +47,8 @@ export function setupSearchListener(callback) {
   const input = getDOMElement('search_input');
   if (input) {
     input.addEventListener('input', () => {
-      applyFilter();
-      if (callback) callback(applyFilter());
+      const filtered = applyFilter();
+      if (callback) callback(filtered);
     });
   }
 }

@@ -50,7 +50,7 @@ export function setFormData(data) {
 export function resetForm() {
   clearMultipleValues(formFieldIds);
   setSelectedRow(null);
-  
+
   // Hapus class selected-row dari semua baris di tabel
   const allRows = document.querySelectorAll('#table_body tr');
   allRows.forEach(r => r.classList.remove('selected-row'));
@@ -100,24 +100,10 @@ export function updateTimeNow() {
     tglInput.value = fullDate;
   }
 
-  // Update Periode Akhir (Selalu ikuti hari ini jika kosong atau belum disetel)
-  const periodeAkhirInput = document.getElementById('periode_akhir');
-  if (periodeAkhirInput && !periodeAkhirInput.value) {
-    periodeAkhirInput.value = fullDate;
+  if (tglInput && (!tglInput.value || (!getSelectedRow() && !isEditMode()))) {
+    tglInput.value = fullDate;
   }
 
-  // Update Periode Awal (Default: 1 Minggu Sebelumnya)
-  const periodeAwalInput = document.getElementById('periode_awal');
-  if (periodeAwalInput && !periodeAwalInput.value) {
-    const lastWeek = new Date();
-    lastWeek.setDate(now.getDate() - 7);
-    
-    const ly = lastWeek.getFullYear();
-    const lmo = String(lastWeek.getMonth() + 1).padStart(2, '0');
-    const ld = String(lastWeek.getDate()).padStart(2, '0');
-    periodeAwalInput.value = `${ly}-${lmo}-${ld}`;
-  }
-  
   // Update trace code juga jika memungkinkan
   updateTraceCode();
 }
@@ -140,7 +126,7 @@ export function startRealTimeClock() {
 export function validateForm() {
   const formData = getFormData();
   const hasValue = Object.values(formData).some(v => v && v.toString().trim() !== '');
-  
+
   if (!hasValue) {
     showNotification('Isi minimal satu field!', 'warning');
     return false;
@@ -259,7 +245,7 @@ export function updateTraceCode() {
   const jamFormatted = jam.replace(':', '').substring(0, 4);
 
   const traceCode = `${tglFormatted}-${jamFormatted}-${group}-${mesin}-${roll}`;
-  
+
   const traceInput = getDOMElement('kode_trace');
   if (traceInput) {
     traceInput.value = traceCode;
@@ -279,14 +265,14 @@ export function toggleFormInputs(enabled, mode = 'full') {
     if (!el) return;
 
     let shouldEnable = enabled;
-    
+
     // Jika mode lanjut, hanya field tertentu yang bisa diedit
     if (enabled && mode === 'lanjut') {
       shouldEnable = editableInLanjut.includes(id);
     }
 
     el.readOnly = !shouldEnable;
-    
+
     // Khusus untuk select (group, mesin)
     if (['group', 'mesin'].includes(id)) {
       el.disabled = !shouldEnable;

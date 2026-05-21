@@ -3,9 +3,17 @@
    ──────────────────────────────────────────────────── */
 
 // Import all modules
-import { getFilteredData, setFilteredData, setCurrentPage, getCurrentPage } from './state.js';
+import {
+  getFilteredData,
+  setFilteredData,
+  setCurrentPage,
+  getCurrentPage,
+  setSourceData,
+  setTotalRecords,
+  getTotalRecords
+} from './state.js';
 import { renderTable, getEntriesPerPage } from './modules/table.js';
-import { setupSearchListener, setupPerPageListener, applyFilter } from './modules/filter.js';
+import { setupSearchListener, setupPerPageListener, applyFilter, getSearchQuery } from './modules/filter.js';
 import { attachButtonHandlers } from './components/button.js';
 import { getPreferences, savePreferences } from './modules/storage.js';
 import { showNotification } from './utils.js';
@@ -67,9 +75,11 @@ function loadPreferences() {
  * Setup all event listeners
  */
 function setupEventListeners() {
-  setupSearchListener(() => {
+  setupSearchListener((filtered) => {
     const perPage = getEntriesPerPage();
-    renderTableData(getFilteredData(), perPage);
+    const hasQuery = Boolean(getSearchQuery().trim());
+    const total = hasQuery ? filtered.length : getTotalRecords();
+    renderTableData(filtered, perPage, total);
   });
 
   setupPerPageListener(async () => {
@@ -114,8 +124,10 @@ async function refreshTableData(startDate = null, endDate = null, page = 1) {
     const limit = getEntriesPerPage();  // Ambil dari user preference
     const result = await fetchRolls(startDate, endDate, page, limit);
     
+    setSourceData(result.data);
     setFilteredData(result.data);
     setCurrentPage(page);
+    setTotalRecords(result.pagination.total);
     
     const totalRecords = result.pagination.total;
     renderTableData(result.data, limit, totalRecords);
@@ -139,7 +151,7 @@ function updateSingleRow(updatedRow) {
     setFilteredData([...currentData]);
     
     const perPage = getEntriesPerPage();
-    renderTableData(currentData, perPage);
+    renderTableData(currentData, perPage, getTotalRecords());
     
     showNotification('Data row berhasil diupdate', 'success');
   }

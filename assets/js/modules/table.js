@@ -14,7 +14,7 @@ import { setFormData, toggleFormInputs } from './form.js';
  */
 export function renderTable(data, perPage, totalVirtual) {
   const currentPage = getCurrentPage();
-  const total = totalVirtual || data.length;
+  const total = Number.isFinite(totalVirtual) ? totalVirtual : data.length;
   const totalPages = Math.ceil(total / perPage);
 
   // Reset halaman jika melebihi batas
@@ -120,6 +120,10 @@ export function renderPagination(totalPages, currentPage) {
   if (!nav) return;
 
   nav.innerHTML = '';
+
+  if (totalPages <= 0) {
+    return;
+  }
 
   const createBtn = (label, page, disabled = false, active = false, isDots = false) => {
     if (isDots) {
