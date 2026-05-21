@@ -690,14 +690,15 @@ select {
   color: var(--gray-400);
   cursor: pointer;
   padding: 4px;
-  transition: color 0.2s;
+  transition: all var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .av-close-top:hover {
-  color: var(--gray-700);
+  color: var(--gray-800);
+  transform: scale(1.15) rotate(90deg);
 }
 
 .av-close-top svg {
@@ -831,6 +832,7 @@ select {
   justify-content: center;
   height: 100%;
   width: 44px;
+  transition: all var(--transition);
 }
 
 .input-icon.left {
@@ -845,7 +847,8 @@ select {
 }
 
 .input-icon.right:hover {
-  color: var(--gray-700);
+  color: var(--blue-mid);
+  transform: scale(1.2);
 }
 
 .input-icon svg {
@@ -886,8 +889,11 @@ select {
 }
 
 .av-btn-cancel:hover {
-  background: var(--gray-50) !important;
+  background: var(--gray-100) !important;
   color: var(--gray-900) !important;
+  border-color: var(--gray-400) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .av-btn-verify {
@@ -896,5 +902,7 @@ select {
 }
 
 .av-btn-verify:hover {
-  background: var(--red-hover) !important;
+  background: var(--red-hover, #ef4444) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35);
 }

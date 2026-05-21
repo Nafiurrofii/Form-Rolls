@@ -3,7 +3,7 @@
    ──────────────────────────────────────────────────── */
 
 import { getDOMElement, formatNumber, showNotification } from '../utils.js';
-import { getCurrentPage, setCurrentPage, setSelectedRow, setEditMode } from '../state.js';
+import { getCurrentPage, setCurrentPage, setSelectedRow, setEditMode, getSelectedRow } from '../state.js';
 import { setFormData, toggleFormInputs } from './form.js';
 
 /**
@@ -14,7 +14,7 @@ import { setFormData, toggleFormInputs } from './form.js';
  */
 export function renderTable(data, perPage, totalVirtual) {
   const currentPage = getCurrentPage();
-  const total = data.length === totalVirtual ? totalVirtual : data.length;
+  const total = totalVirtual || data.length;
   const totalPages = Math.ceil(total / perPage);
 
   // Reset halaman jika melebihi batas
@@ -24,13 +24,13 @@ export function renderTable(data, perPage, totalVirtual) {
   }
 
   const start = (currentPage - 1) * perPage;
-  const slice = data.slice(start, start + perPage);
+  const selectedRow = getSelectedRow();
 
   // Render body tabel
   const tbody = getDOMElement('table_body');
   if (tbody) {
     tbody.innerHTML = '';
-    slice.forEach((row, index) => {
+    data.forEach((row, index) => {
       const no = start + index + 1;
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -52,6 +52,12 @@ export function renderTable(data, perPage, totalVirtual) {
         <td>${row.user}</td>
       `;
       tr.style.cursor = 'pointer';
+
+      // ✅ TAMBAHKAN: Check apakah row ini adalah selected row
+      if (selectedRow && row.id === selectedRow.id) {
+        tr.classList.add('selected-row');
+      }
+
       tr.addEventListener('click', (e) => handleRowClick(row, e.currentTarget));
       tbody.appendChild(tr);
     });

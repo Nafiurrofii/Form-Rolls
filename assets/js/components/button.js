@@ -2,7 +2,7 @@
    COMPONENTS: BUTTON - Reusable Button Component
    ──────────────────────────────────────────────────── */
 
-import { showNotification, confirmAction, setMultipleValues } from '../utils.js';
+import { showNotification, confirmAction, setMultipleValues, getDOMElement } from '../utils.js';
 import { getFormData, setFormData, resetForm, validateForm, enableEditMode, disableEditMode, updateTraceCode, updateTimeNow, toggleFormInputs } from '../modules/form.js';
 import { saveRoll, deleteRoll, continueRoll } from '../modules/api.js';
 import { isEditMode, setEditMode, getSelectedRow, getCurrentUser } from '../state.js';
@@ -60,22 +60,6 @@ export function attachButtonHandlers() {
   const btnLihat = document.querySelector('.btn-tool.lihat');
   if (btnLihat) {
     btnLihat.addEventListener('click', handleLihat);
-  }
-
-  // Auto-filter saat tanggal dipilih
-  const periodeAwal = document.getElementById('periode_awal');
-  const periodeAkhir = document.getElementById('periode_akhir');
-  if (periodeAwal && periodeAkhir) {
-    const applyFilter = () => {
-      if (periodeAwal.value && periodeAkhir.value) {
-        if (window.formRollApp && typeof window.formRollApp.refreshTableData === 'function') {
-          // showNotification('Menerapkan filter periode...', 'info');
-          window.formRollApp.refreshTableData(periodeAwal.value, periodeAkhir.value);
-        }
-      }
-    };
-    periodeAwal.addEventListener('change', applyFilter);
-    periodeAkhir.addEventListener('change', applyFilter);
   }
 
   // EXCEL button
@@ -152,6 +136,7 @@ async function handleSimpan() {
 
     if (isLanjut && rollId) {
       console.log('⏩ Mode LANJUT aktif: Memanggil continueRoll()');
+      formData.tanggal = new Date().toISOString().split('T')[0]; // Update tanggal ke hari ini
       result = await continueRoll(formData, rollId);
     } else {
       console.log('💾 Mode BARU/EDIT aktif: Memanggil saveRoll()');
@@ -223,6 +208,12 @@ function handleLanjut() {
 
     // Update jam ke waktu sekarang agar trace code real-time
     updateTimeNow();
+
+    const tglInput = getDOMElement('tanggal');
+    if (tglInput) {
+        const today = new Date().toISOString().split('T')[0];
+        tglInput.value = today;
+    }
 
     // Set nilai roll_ke menjadi (nilai asli + 1)
     const nextRoll = parseInt(selected.roll || 0) + 1;

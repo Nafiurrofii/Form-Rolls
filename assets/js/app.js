@@ -3,7 +3,7 @@
    ──────────────────────────────────────────────────── */
 
 // Import all modules
-import { getFilteredData, setFilteredData, setCurrentPage } from './state.js';
+import { getFilteredData, setFilteredData, setCurrentPage, getCurrentPage } from './state.js';
 import { renderTable, getEntriesPerPage } from './modules/table.js';
 import { setupSearchListener, setupPerPageListener, applyFilter } from './modules/filter.js';
 import { attachButtonHandlers } from './components/button.js';
@@ -72,23 +72,34 @@ function setupEventListeners() {
     renderTableData(getFilteredData(), perPage);
   });
 
-  setupPerPageListener(() => {
-    const perPage = getEntriesPerPage();
-    renderTableData(getFilteredData(), perPage);
+  setupPerPageListener(async () => {
+    setCurrentPage(1);  // Reset ke halaman 1
+    const startInput = document.getElementById('periode_awal');
+    const endInput = document.getElementById('periode_akhir');
+    
+    const startDate = startInput?.value || null;
+    const endDate = endInput?.value || null;
+    
+    await refreshTableData(startDate, endDate, 1);  // Fetch ulang dengan limit baru
   });
 
-  window.addEventListener('pageChanged', () => {
-    const perPage = getEntriesPerPage();
-    renderTableData(getFilteredData(), perPage);
-  });
+window.addEventListener('pageChanged', async () => {
+  const page = getCurrentPage();
+  const startInput = document.getElementById('periode_awal');
+  const endInput = document.getElementById('periode_akhir');
+  
+  const startDate = startInput?.value || null;
+  const endDate = endInput?.value || null;
+  
+  await refreshTableData(startDate, endDate, page);
+});
 }
 
 /**
  * Render table dengan data
  */
-function renderTableData(data, perPage) {
-  const total = data.length;
-  renderTable(data, perPage, total);
+function renderTableData(data, perPage, totalVirtual) {
+  renderTable(data, perPage, totalVirtual);
 }
 
 /**
@@ -96,18 +107,20 @@ function renderTableData(data, perPage) {
  * @param {string} startDate - (Optional)
  * @param {string} endDate - (Optional)
  */
-async function refreshTableData(startDate = null, endDate = null) {
+async function refreshTableData(startDate = null, endDate = null, page = 1) {
   try {
-    console.log('🔄 Refreshing data...');
-    const data = await fetchRolls(startDate, endDate);
-    setFilteredData(data);
-    setCurrentPage(1);
+    console.log('🔄 Refreshing data (page ' + page + ')...');
     
-    const perPage = getEntriesPerPage();
-    renderTableData(data, perPage);
+    const limit = getEntriesPerPage();  // Ambil dari user preference
+    const result = await fetchRolls(startDate, endDate, page, limit);
     
-    // showNotification('✅ Data diperbarui', 'success'); // Dihapus karena mengganggu user
-    console.log(`✅ Loaded ${data.length} records`);
+    setFilteredData(result.data);
+    setCurrentPage(page);
+    
+    const totalRecords = result.pagination.total;
+    renderTableData(result.data, limit, totalRecords);
+    
+    console.log(`✅ Loaded ${result.data.length} records (page ${page}/${result.pagination.pages})`);
   } catch (error) {
     console.error('❌ Fetch error:', error);
     showNotification('Gagal memuat data', 'error');

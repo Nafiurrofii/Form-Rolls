@@ -9,13 +9,18 @@ function getRolls($pdo) {
     try {
         $startDate = $_GET['start'] ?? null;
         $endDate = $_GET['end'] ?? null;
+        $page = (int)($_GET['page'] ?? 1);
+        $limit = (int)($_GET['limit'] ?? 100);
 
         $roll = new Roll($pdo);
-        $data = $roll->getAll($startDate, $endDate);
+        
+        // Gunakan pagination
+        $result = $roll->getAllPaginated($page, $limit, $startDate, $endDate);
 
         echo json_encode([
             'status' => 'success',
-            'data' => $data
+            'data' => $result['data'],
+            'pagination' => $result['pagination']
         ]);
     } catch (Throwable $e) {
         http_response_code(500);
@@ -114,11 +119,20 @@ function continueRoll($pdo, $id) {
 
         $roll = new Roll($pdo);
 
-        $roll->continue($id, $allowedData);
+        $lastUrut = $roll->continue($id, $allowedData);
+
+        // Update register dan barcode otomatis
+        $updateSql = "UPDATE rolls SET register = :val, barcode = :val WHERE urut = :urut";
+        $updateStmt = $pdo->prepare($updateSql);
+        $updateStmt->execute([
+            ':val' => $lastUrut,
+            ':urut' => $lastUrut
+        ]);
 
         echo json_encode([
             'status' => 'success',
-            'message' => 'Data berhasil dilanjutkan'
+            'message' => 'Data berhasil dilanjutkan',
+            'data' => ['id' => $lastUrut]
         ]);
 
     } catch (Throwable $e) {

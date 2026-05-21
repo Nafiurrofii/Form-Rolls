@@ -47,6 +47,83 @@ class Roll {
     }
 
     /**
+     * GET ALL DATA WITH SERVER-SIDE PAGINATION
+     * @param int $page - Halaman (default: 1)
+     * @param int $limit - Records per page (default: 100)
+     * @param string $startDate - Filter (optional)
+     * @param string $endDate - Filter (optional)
+     * @return array - Data dengan pagination info
+     */
+    public function getAllPaginated($page = 1, $limit = 100, $startDate = null, $endDate = null) {
+        $page = max(1, (int)$page);
+        $limit = min(500, max(10, (int)$limit)); // Max 500 per page
+        $offset = ($page - 1) * $limit;
+        
+        // 1. Hitung total records
+        $countSql = "SELECT COUNT(*) as total FROM rolls";
+        $params = [];
+        if ($startDate && $endDate) {
+            $countSql .= " WHERE tanggal BETWEEN :start AND :end";
+            $params[':start'] = $startDate;
+            $params[':end'] = $endDate;
+        }
+        
+        $countStmt = $this->pdo->prepare($countSql);
+        $countStmt->execute($params);
+        $total = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+        
+        // 2. Query data dengan LIMIT dan OFFSET
+        $sql = "SELECT 
+                    id,
+                    tanggal AS tgl,
+                    jam,
+                    roll,
+                    group_name AS shift,
+                    mesin,
+                    nama,
+                    denier AS dnr,
+                    panjang AS pj,
+                    lebar AS lb,
+                    anyam,
+                    berat AS br,
+                    trace_code AS trace,
+                    register AS reg,
+                    barcode,
+                    keterangan,
+                    pic AS user
+                FROM rolls";
+        
+        if ($startDate && $endDate) {
+            $sql .= " WHERE tanggal BETWEEN :start AND :end";
+        }
+        
+        $sql .= " ORDER BY urut DESC LIMIT :limit OFFSET :offset";
+        
+        $stmt = $this->pdo->prepare($sql);
+        
+        // Bind semua parameter
+        if ($startDate && $endDate) {
+            $stmt->bindValue(':start', $startDate);
+            $stmt->bindValue(':end', $endDate);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        
+        $stmt->execute();
+        
+        // 3. Return dengan metadata pagination
+        return [
+            'data' => $stmt->fetchAll(),
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $total,
+                'pages' => ceil($total / $limit)
+            ]
+        ];
+    }
+
+    /**
      * STORE DATA
      */
     public function store($data) {
@@ -171,25 +248,62 @@ class Roll {
     }
 
     public function continue($id, $data) {
-
-        $sql = "
-            UPDATE rolls
-            SET
-                jam = :jam,
-                roll = :roll,
-                group_name = :group_name,
-                mesin = :mesin,
-                panjang = :panjang,
-                lebar = :lebar,
-                berat = :berat,
-                pic = :pic,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = :id
-        ";
-
-        $stmt = $this->pdo->prepare($sql);
-
-        return $stmt->execute([
+        // 1. Ambil data asli dari record yang dipilih
+        $selectSql = "SELECT 
+                        nama,
+                        denier,
+                        anyam,
+                        trace_code,
+                        keterangan
+                    FROM rolls
+                    WHERE id = :id";
+        
+        $selectStmt = $this->pdo->prepare($selectSql);
+        $selectStmt->execute([':id' => $id]);
+        $originalData = $selectStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$originalData) {
+            throw new Exception('Data tidak ditemukan');
+        }
+        
+        // 2. Insert record baru dengan tanggal hari ini (real-time)
+        $insertSql = "INSERT INTO rolls (
+                        id,
+                        tanggal,
+                        jam,
+                        roll,
+                        group_name,
+                        mesin,
+                        nama,
+                        denier,
+                        panjang,
+                        lebar,
+                        anyam,
+                        berat,
+                        trace_code,
+                        keterangan,
+                        pic
+                    ) VALUES (
+                        UUID(),
+                        CURDATE(),
+                        :jam,
+                        :roll,
+                        :group_name,
+                        :mesin,
+                        :nama,
+                        :denier,
+                        :panjang,
+                        :lebar,
+                        :anyam,
+                        :berat,
+                        :trace_code,
+                        :keterangan,
+                        :pic
+                    )";
+        
+        $insertStmt = $this->pdo->prepare($insertSql);
+        
+        $insertStmt->execute([
             ':jam'        => $data['jam'],
             ':roll'       => $data['roll'],
             ':group_name' => $data['group_name'],
@@ -197,9 +311,18 @@ class Roll {
             ':panjang'    => $data['panjang'],
             ':lebar'      => $data['lebar'],
             ':berat'      => $data['berat'],
-            ':pic'        => $data['pic'],
-            ':id'         => $id
+            ':anyam'      => $originalData['anyam'],
+            ':denier'     => $originalData['denier'],
+            ':nama'       => $originalData['nama'],
+            ':trace_code' => $originalData['trace_code'],
+            ':keterangan' => $originalData['keterangan'],
+            ':pic'        => $data['pic']
         ]);
+
+        // Ambil urut dari record yang baru dibuat
+        $lastUrut = $this->pdo->query("SELECT MAX(urut) as urut FROM rolls")->fetch(PDO::FETCH_ASSOC)['urut'];
+
+        return (int)$lastUrut;
     }
 
     public function getChartData($days = 14, $startDate = null, $endDate = null) {

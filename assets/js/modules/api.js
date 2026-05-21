@@ -18,9 +18,9 @@ const API_BASE_URL = getAPIBaseUrl();
  * @param {string} endDate - Format YYYY-MM-DD (opsional)
  * @returns {Promise<Array>}
  */
-export async function fetchRolls(startDate = null, endDate = null) {
+export async function fetchRolls(startDate = null, endDate = null, page = 1, limit = 100) {
   try {
-    let url = `${API_BASE_URL}?action=get`;
+    let url = `${API_BASE_URL}?action=get&page=${page}&limit=${limit}`;
     if (startDate && endDate) {
       url += `&start=${startDate}&end=${endDate}`;
     }
@@ -37,7 +37,11 @@ export async function fetchRolls(startDate = null, endDate = null) {
       throw new Error(result.message || 'Unknown error');
     }
     
-    return result.data;
+    // Return lengkap dengan pagination info
+    return {
+      data: result.data,
+      pagination: result.pagination
+    };
   } catch (error) {
     console.error('❌ API Error:', error);
     throw error;

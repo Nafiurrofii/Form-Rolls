@@ -83,7 +83,7 @@ export function updateTimeNow() {
   const isLanjutActive = document.querySelector('.btn-lanjut.active');
   const noDataSelected = !getSelectedRow();
 
-  if (jamInput && (isBaruActive || isEditActive || isLanjutActive || noDataSelected)) {
+  if (jamInput && (isBaruActive || isLanjutActive || noDataSelected)) {
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
