@@ -54,6 +54,14 @@ async function initializeApp() {
   
   // Kosongkan form pada saat awal aplikasi dimuat
   resetForm();
+
+  // Set periode filter ke hari ini
+  const today = new Date().toISOString().split('T')[0];
+  const periodeAwal = document.getElementById('periode_awal');
+  const periodeAkhir = document.getElementById('periode_akhir');
+  
+  if (periodeAwal) periodeAwal.value = today;
+  if (periodeAkhir) periodeAkhir.value = today;
   
   console.log('✅ App initialized successfully');
 }

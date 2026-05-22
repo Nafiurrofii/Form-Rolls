@@ -104,7 +104,7 @@
             <div class="field-row">
               <label>Mesin</label>
               <div class="input-wrap">
-                <input type="number" id="mesin">
+                <input type="text" id="mesin">
               </div>
             </div>
             <input type="hidden" id="lanjut" value="Lanjut">
