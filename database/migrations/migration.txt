@@ -1,0 +1,2 @@
+php backend/run_migration.php database/migrations/2026_05_23_000001_create_form_roll_schema.sql
+php backend/setup_auth.php
