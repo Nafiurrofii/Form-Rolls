@@ -47,3 +47,17 @@ SELECT
     'migrasi' AS status_input
 FROM db_loomregister.tbl_produksi p
 ORDER BY p.urut ASC;
+
+
+INSERT INTO users (username, password, role)
+VALUES
+(
+    'admin',
+    '$2b$12$4mU.CXdDp81AqtTge9s1QuIUMy5.4u3lqViJ/TR2MuAHb9HXoApxe',
+    'administrator'
+),
+(
+    'operator',
+    '$2b$12$tYVXJCCSmazci0d/bdUn8emWQIOVlVPMM0xvfDKWiN78C4H1jRrvK',
+    'operator'
+);

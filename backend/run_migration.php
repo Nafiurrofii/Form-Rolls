@@ -1,9 +1,6 @@
 <?php
 
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_CHARSET', 'utf8mb4');
+require_once __DIR__ . '/config/database.php';
 
 if ($argc < 2) {
     fwrite(STDERR, "Usage: php backend/run_migration.php <sql-file>\n");
@@ -25,7 +22,7 @@ if ($sql === false) {
 }
 
 try {
-    // Connect without selecting a database first, so CREATE DATABASE / USE can run.
+    // Gunakan konstanta dari config/database.php
     $bootstrapDsn = "mysql:host=" . DB_HOST . ";charset=" . DB_CHARSET;
     $bootstrapPdo = new PDO($bootstrapDsn, DB_USER, DB_PASS, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
