@@ -4,7 +4,7 @@
 
 import { showNotification, confirmAction, setMultipleValues, getDOMElement } from '../utils.js';
 import { getFormData, setFormData, resetForm, validateForm, enableEditMode, disableEditMode, updateTraceCode, updateTimeNow, toggleFormInputs } from '../modules/form.js';
-import { saveRoll, deleteRoll, continueRoll } from '../modules/api.js';
+import { saveRoll, deleteRoll, continueRoll, fetchAllRollsForExport } from '../modules/api.js';
 import { isEditMode, setEditMode, getSelectedRow, getCurrentUser } from '../state.js';
 import { openPrintModal } from './printModal.js';
 import { showAdminVerification } from '../modules/auth.js';
@@ -367,63 +367,74 @@ function handleExcel() {
   const startInput = document.getElementById('periode_awal');
   const endInput = document.getElementById('periode_akhir');
 
-  // Mengambil data yang saat ini aktif di tabel (setelah filter/pencarian dll)
-  const appState = window.formRollApp;
-  if (!appState || !appState.getFilteredData) return;
-
-  const data = appState.getFilteredData();
-  if (!data || data.length === 0) {
-    showNotification('Tidak ada data untuk diekspor', 'warning');
-    return;
-  }
+  // Get filter dates
+  const startDate = startInput?.value || null;
+  const endDate = endInput?.value || null;
 
   showNotification('Mengekspor ke Excel (XLSX)...', 'info');
 
   // Header Excel (Kolom Tabel)
   const headers = ['NO', 'TANGGAL', 'JAM', 'ROLL', 'SHIFT', 'MESIN', 'NAMA', 'DENIER', 'PANJANG', 'LEBAR', 'ANYAM', 'BERAT', 'TRACE CODE', 'REGISTER', 'KETERANGAN', 'PIC'];
 
-  // Map data ke bentuk array untuk Excel
-  const rows = data.map((item, index) => [
-    index + 1,
-    item.tgl,
-    item.jam,
-    item.roll,
-    item.shift,
-    item.mesin,
-    item.nama,
-    item.dnr,
-    item.pj,
-    item.lb,
-    item.anyam,
-    item.br,
-    item.trace,
-    item.reg,
-    item.keterangan || '',
-    item.user || ''
-  ]);
+  // Fetch semua data yang sudah difilter (tidak hanya halaman saat ini)
+  fetchAllRollsForExport(startDate, endDate)
+    .then((result) => {
+      const data = result.data;
+      
+      if (!data || data.length === 0) {
+        showNotification('Tidak ada data untuk diekspor', 'warning');
+        return;
+      }
 
-  // Cek apakah SheetJS tersedia
-  if (typeof XLSX === 'undefined') {
-    alert('Library Excel (SheetJS) belum dimuat. Periksa koneksi internet.');
-    return;
-  }
+      // Map data ke bentuk array untuk Excel
+      const rows = data.map((item, index) => [
+        index + 1,
+        item.tgl,
+        item.jam,
+        item.roll,
+        item.shift,
+        item.mesin,
+        item.nama,
+        item.dnr,
+        item.pj,
+        item.lb,
+        item.anyam,
+        item.br,
+        item.trace,
+        item.reg,
+        item.keterangan || '',
+        item.user || ''
+      ]);
 
-  // Gabungkan header dan baris data
-  const worksheetData = [headers, ...rows];
+      // Cek apakah SheetJS tersedia
+      if (typeof XLSX === 'undefined') {
+        alert('Library Excel (SheetJS) belum dimuat. Periksa koneksi internet.');
+        return;
+      }
 
-  // Buat worksheet dan workbook
-  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Data Roll");
+      // Gabungkan header dan baris data
+      const worksheetData = [headers, ...rows];
 
-  // Tentukan nama file
-  let fileName = 'Data_Roll_Produksi.xlsx';
-  if (startInput && endInput && startInput.value && endInput.value) {
-    fileName = `Data_Roll_${startInput.value}_sd_${endInput.value}.xlsx`;
-  }
+      // Buat worksheet dan workbook
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Roll");
 
-  // Trigger download file .xlsx
-  XLSX.writeFile(workbook, fileName);
+      // Tentukan nama file
+      let fileName = 'Data_Roll_Produksi.xlsx';
+      if (startInput && endInput && startInput.value && endInput.value) {
+        fileName = `Data_Roll_${startInput.value}_sd_${endInput.value}.xlsx`;
+      }
+
+      // Trigger download file .xlsx
+      XLSX.writeFile(workbook, fileName);
+      
+      showNotification(`Berhasil mengekspor ${data.length} data ke Excel`, 'success');
+    })
+    .catch((error) => {
+      console.error('❌ Export error:', error);
+      showNotification('Gagal mengekspor data: ' + error.message, 'error');
+    });
 }
 
 /**

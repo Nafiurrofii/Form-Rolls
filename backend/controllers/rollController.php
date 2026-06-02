@@ -11,17 +11,32 @@ function getRolls($pdo) {
         $endDate = $_GET['end'] ?? null;
         $page = (int)($_GET['page'] ?? 1);
         $limit = (int)($_GET['limit'] ?? 100);
+        $export = $_GET['export'] ?? false;
 
         $roll = new Roll($pdo);
         
-        // Gunakan pagination
-        $result = $roll->getAllPaginated($page, $limit, $startDate, $endDate);
-
-        echo json_encode([
-            'status' => 'success',
-            'data' => $result['data'],
-            'pagination' => $result['pagination']
-        ]);
+        // Jika export mode, ambil semua data tanpa pagination
+        if ($export) {
+            $data = $roll->getAll($startDate, $endDate);
+            echo json_encode([
+                'status' => 'success',
+                'data' => $data,
+                'pagination' => [
+                    'page' => 1,
+                    'limit' => count($data),
+                    'total' => count($data),
+                    'pages' => 1
+                ]
+            ]);
+        } else {
+            // Gunakan pagination untuk normal view
+            $result = $roll->getAllPaginated($page, $limit, $startDate, $endDate);
+            echo json_encode([
+                'status' => 'success',
+                'data' => $result['data'],
+                'pagination' => $result['pagination']
+            ]);
+        }
     } catch (Throwable $e) {
         http_response_code(500);
         echo json_encode([

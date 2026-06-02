@@ -62,6 +62,42 @@ export async function fetchRolls(startDate = null, endDate = null, page = 1, lim
 }
 
 /**
+ * Fetch all rolls untuk export (tanpa pagination)
+ * @param {string} startDate - Format YYYY-MM-DD (opsional)
+ * @param {string} endDate - Format YYYY-MM-DD (opsional)
+ * @returns {Promise<Array>}
+ */
+export async function fetchAllRollsForExport(startDate = null, endDate = null) {
+  try {
+    let url = `${API_BASE_URL}?action=get&export=true`;
+    if (startDate && endDate) {
+      url += `&start=${startDate}&end=${endDate}`;
+    }
+    
+    const response = await fetch(url, { credentials: 'include' });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await parseJsonResponse(response, 'Fetch all rolls for export');
+    
+    if (result.status !== 'success') {
+      throw new Error(result.message || 'Unknown error');
+    }
+    
+    // Return lengkap dengan pagination info
+    return {
+      data: result.data,
+      pagination: result.pagination
+    };
+  } catch (error) {
+    console.error('❌ API Error (Export):', error);
+    throw error;
+  }
+}
+
+/**
  * Fetch single roll by ID
  */
 export async function fetchRollById(id) {
