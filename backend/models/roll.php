@@ -8,9 +8,24 @@ class Roll {
         $this->pdo = $pdo;
     }
 
-    private function buildRegisterValue($tanggal, $urut) {
+    private function buildRegisterValue($tanggal) {
         $yearTwoDigit = substr((string)$tanggal, 2, 2);
-        return $yearTwoDigit . $urut;
+        
+        // Ambil register terakhir yang tidak null
+        $stmt = $this->pdo->prepare("SELECT register FROM rolls WHERE register IS NOT NULL ORDER BY urut DESC LIMIT 1");
+        $stmt->execute();
+        $lastRegister = $stmt->fetchColumn();
+        
+        if ($lastRegister) {
+            // Extract 4 digit belakang dan tambah 1
+            $lastFourDigits = (int)substr((string)$lastRegister, -4);
+            $nextCounter = str_pad($lastFourDigits + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            // Jika belum ada register, mulai dari 0001
+            $nextCounter = '0001';
+        }
+        
+        return $yearTwoDigit . $nextCounter;
     }
 
     private function syncRegisterAndBarcode($urut) {
@@ -22,7 +37,7 @@ class Roll {
             throw new Exception('Tanggal data tidak ditemukan untuk generate register');
         }
 
-        $registerValue = $this->buildRegisterValue($result['tanggal'], $urut);
+        $registerValue = $this->buildRegisterValue($result['tanggal']);
 
         $updateSql = "UPDATE rolls SET register = :val, barcode = :val WHERE urut = :urut";
         $updateStmt = $this->pdo->prepare($updateSql);
